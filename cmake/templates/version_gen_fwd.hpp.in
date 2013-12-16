@@ -1,0 +1,50 @@
+//
+/// \note Automatically generated file. Do not change !
+/// \note Generation tool: @VERSION_TOOL@
+//
+
+#ifndef __VERSION_GEN_FWD_HPP__
+#define __VERSION_GEN_FWD_HPP__
+
+#include <string>
+
+#define COMPILATION_DATE \
+  __DATE__ " " __TIME__
+
+namespace Version_info
+{
+  // ---- Project ----
+
+  char const * get_project_name();
+
+  char const * get_project_date();
+
+  char const * get_project_comment();
+
+  // ---- Build ----
+
+  char const * get_build_date();
+
+  char const * get_build_type();
+
+  char const * get_build_comment();
+
+  // ---- Version ----
+
+  char const* get_version();
+
+  // ---- Environment ----
+
+  char const* get_c_compiler_version();
+
+  char const* get_cxx_compiler_version();
+
+  char const* get_platform_version();
+
+	// ---- Complete info ----
+
+  std::string get_complete_version_info();
+
+} // namespace Version_info
+
+#endif // __VERSION_GEN_FWD_HPP__

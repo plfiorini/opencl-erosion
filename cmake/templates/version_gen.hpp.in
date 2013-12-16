@@ -1,0 +1,126 @@
+//
+/// \file
+/// \note Automatically generated file. Do not change !
+/// \note Generation tool: @VERSION_TOOL@
+//
+
+#ifndef __VERSION_GEN_HPP__
+#define __VERSION_GEN_HPP__
+
+#include <@GENERATION_DIR@/version_gen_fwd.hpp>
+#include <sstream>
+#include <string>
+
+#define PROJECT_NAME_PREFIX       "@(#)PROJECT_NAME:"
+#define PROJECT_DATE_PREFIX       "@(#)PROJECT_DATE:"
+#define PROJECT_COMMENT_PREFIX    "@(#)PROJECT_COMMENT:"
+
+#define BUILD_DATE_PREFIX         "@(#)BUILD_DATE:"
+#define BUILD_TYPE_PREFIX         "@(#)BUILD_TYPE:"
+#define BUILD_COMMENT_PREFIX      "@(#)BUILD_COMMENT:"
+
+#define VERSION_PREFIX            "@(#)VERSION:"
+
+#define C_COMPILER_VERSION_PREFIX     "@(#)C_COMPILER_VERSION:"
+#define CXX_COMPILER_VERSION_PREFIX   "@(#)CXX_COMPILER_VERSION:"
+#define PLATFORM_VERSION_PREFIX       "@(#)PLATFORM_VERSION:"
+
+namespace Version_info
+{
+  char const project_name[] =         PROJECT_NAME_PREFIX         "@PROJECT_NAME@";
+  char const project_date[] =         PROJECT_DATE_PREFIX         "@PROJECT_DATE@";
+  char const project_comment[] =      PROJECT_COMMENT_PREFIX      "@PROJECT_COMMENT@";
+
+  char const build_date[] =           BUILD_DATE_PREFIX           "@BUILD_DATE@";
+  char const build_type[] =           BUILD_TYPE_PREFIX           "@BUILD_TYPE@";
+  char const build_comment[] =        BUILD_COMMENT_PREFIX        "@BUILD_COMMENT@";
+
+  char const version[] =              VERSION_PREFIX              "@VERSION@";
+  char const c_compiler_version[] =   C_COMPILER_VERSION_PREFIX   "@C_COMPILER_VERSION@";
+  char const cxx_compiler_version[] = CXX_COMPILER_VERSION_PREFIX "@CXX_COMPILER_VERSION@";
+  char const platform_version[] =     PLATFORM_VERSION_PREFIX     "@PLATFORM_VERSION@";
+
+  // ---- Project ----
+
+  char const * get_project_name()
+  {
+      return (project_name + sizeof(PROJECT_NAME_PREFIX) - 1);
+  }
+
+  char const * get_project_date()
+  {
+      return (project_date + sizeof(PROJECT_DATE_PREFIX) - 1);
+  }
+
+  char const * get_project_comment()
+  {
+      return (project_comment + sizeof(PROJECT_COMMENT_PREFIX) - 1);
+  }
+
+  // ---- Build ----
+
+  char const * get_build_date()
+  {
+      return (build_date + sizeof(BUILD_DATE_PREFIX) - 1);
+  }
+
+  char const * get_build_type()
+  {
+      return (build_type + sizeof(BUILD_TYPE_PREFIX) -1);
+  }
+
+  char const * get_build_comment()
+  {
+      return (build_comment + sizeof(BUILD_COMMENT_PREFIX) - 1);
+  }
+
+  // ---- Version ----
+
+  char const * get_version()
+  {
+      return (version + sizeof(VERSION_PREFIX) - 1);
+  }
+
+  // ---- Environment ----
+
+  char const * get_c_compiler_version()
+  {
+    return(c_compiler_version + sizeof(C_COMPILER_VERSION_PREFIX) - 1);
+  }
+
+  char const * get_cxx_compiler_version()
+  {
+    return(cxx_compiler_version + sizeof(CXX_COMPILER_VERSION_PREFIX) - 1);
+  }
+
+  char const * get_platform_version()
+  {
+    return(platform_version + sizeof(PLATFORM_VERSION_PREFIX) - 1);
+  }
+
+  std::string get_complete_version_info()
+  {
+      std::ostringstream os;
+
+      os << "Version: " << get_version()
+         << std::endl;
+
+      os << "Project: " << get_project_name()
+         << ", " << get_project_date()
+         << ", " << get_project_comment() << std::endl;
+
+      os << "Build: " << get_build_date()
+         << "Build Type: " << get_build_type()
+         << "Build Comment: " << get_build_comment() << std::endl;
+
+      os << "Environment: " << std::endl
+         << "  C-Compiler      : " << get_c_compiler_version() << std::endl
+         << "  CXX-Compiler    : " << get_cxx_compiler_version() << std::endl
+         << "  Target Platform : " << get_platform_version() << std::endl;
+
+      return os.str();
+  }
+
+} // namespace Version_info
+
+#endif // __VERSION_GEN_HPP__

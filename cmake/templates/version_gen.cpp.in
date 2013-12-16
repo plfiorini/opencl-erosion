@@ -1,0 +1,11 @@
+//
+/// \file
+/// \note Automatically generated file. Do not change !
+/// \note Generation tool: @VERSION_TOOL@
+//
+
+#include <@GENERATION_DIR@/version_gen.hpp>
+
+namespace Version_info
+{
+} // namespace Version_info
