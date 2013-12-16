@@ -1,5 +1,5 @@
 
-project(erosion)
+project(starter)
 
 include(build_functions)
 

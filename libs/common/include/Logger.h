@@ -26,22 +26,22 @@ public:
   Log();
   ~Log();
 
-  std::ostringstream &Get( LogLevel::ENUM level, 
+  std::ostringstream &Get( LogLevel level, 
                            char const * i_pFilePath,
                            char const * i_pFunctionName,
                            boost::int32_t const i_LineNo );
 
   static void SetWriteTime( bool i_WriteTime ) { ms_WriteTime = i_WriteTime; }
 
-  static LogLevel::ENUM GetVerbosity() { return ms_Verbosity; }
+  static LogLevel GetVerbosity() { return ms_Verbosity; }
   /// set the logging verbosity, all messages with level <= verbosity are logged
-  static void SetVerbosity(LogLevel::ENUM i_Verbosity) { ms_Verbosity = i_Verbosity; }
+  static void SetVerbosity(LogLevel i_Verbosity) { ms_Verbosity = i_Verbosity; }
 
-  static void AddLoggingDestination(LogLevel::ENUM i_Level, LogOstream *i_LoggingDest) 
+  static void AddLoggingDestination(LogLevel i_Level, LogOstream *i_LoggingDest) 
   {
     ms_LoggingDestinations[i_Level].push_back(i_LoggingDest); 
   }
-  static void AddLoggingDestination(LogLevel::ENUM i_Level, std::ofstream *i_LoggingDest) 
+  static void AddLoggingDestination(LogLevel i_Level, std::ofstream *i_LoggingDest) 
   {
     ms_LoggingDestinations[i_Level].push_back(reinterpret_cast<LogOstream *>(i_LoggingDest)); 
   }
@@ -57,14 +57,14 @@ protected:
   std::ostringstream m_OS;
 
   static bool ms_WriteTime;
-  static LogLevel::ENUM ms_Verbosity;
-  static std::map<LogLevel::ENUM, std::vector<LogOstream *> > ms_LoggingDestinations;
+  static LogLevel ms_Verbosity;
+  static std::map<LogLevel, std::vector<LogOstream *> > ms_LoggingDestinations;
 
 private:
   Log(const Log&);
   Log& operator=(const Log&);
 
-  LogLevel::ENUM m_MessageLevel;
+  LogLevel m_MessageLevel;
 
   void WritePrefix(char const * i_pFilePath, char const * i_pFunctionName, boost::int32_t const i_LineNo);
 };

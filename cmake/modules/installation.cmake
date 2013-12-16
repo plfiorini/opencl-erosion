@@ -17,18 +17,18 @@ function(set_pkg_if_unset default)
 endfunction(set_pkg_if_unset)
 
 #
-# install IDS header files, but exclude external files
+# install header files, but exclude external files
 #
 function(install_headers)
     set_pkg_if_unset("dev")
     if (ENABLE_INSTALL_INTERNAL_HEADERS)
-        install(DIRECTORY include/ids 
+        install(DIRECTORY include/
           DESTINATION output/include 
           COMPONENT ${INSTALL_PKG}
           PATTERN ".svn" EXCLUDE)
     else()
         if(EXTERNAL_VISIBLE)
-            install(DIRECTORY include/ids 
+            install(DIRECTORY include/
               DESTINATION include 
               COMPONENT ${INSTALL_PKG}
               REGEX "/.svn/|_impl.hpp" EXCLUDE)

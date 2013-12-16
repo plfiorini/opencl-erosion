@@ -1,7 +1,39 @@
 include(logging)
 
+find_file(
+  version_gen_hpp_in
+  "version_gen.hpp.in"
+  PATH "${CMAKE_HOME_DIRECTORY}/cmake/templates"
+  DOC "input template file for generation of version_gen.hpp"
+)
+
+if(NOT version_gen_hpp_in)
+  message(FATAL "Cannot find version_gen.hpp.in")
+endif()
+
+find_file(
+  version_gen_fwd_hpp_in
+  "version_gen_fwd.hpp.in"
+  PATH "${CMAKE_HOME_DIRECTORY}/cmake/templates"
+  DOC "input template file for generation of version_gen_fwd.hpp"
+)
+
+if(NOT version_gen_fwd_hpp_in)
+  message(FATAL "Cannot find version_gen_fwd.hpp.in")
+endif()
+
+find_file(
+  version_gen_cpp_in
+  "version_gen.cpp.in"
+  PATH "${CMAKE_HOME_DIRECTORY}/cmake/templates"
+  DOC "input template file for generation of version_gen.cpp"
+)
+
+if(NOT version_gen_cpp_in)
+  message(FATAL "Cannot find version_gen.cpp.in")
+endif()
+
 find_program(date_tool "date"         DOC "the common date tool")
-find_program(svnversion_tool "svnversion" DOC "the git working copy version tool")
 
 execute_process(COMMAND ${date_tool} "+%Y.%m.%d" OUTPUT_VARIABLE version_info_DATE  OUTPUT_STRIP_TRAILING_WHITESPACE)
 execute_process(COMMAND ${date_tool} "+%Y"       OUTPUT_VARIABLE version_info_YEAR  OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -10,8 +42,8 @@ execute_process(COMMAND ${date_tool} "+%-d"      OUTPUT_VARIABLE version_info_DA
 
 find_package(Git)
 
-if(NOT Subversion_FOUND)
-  message(FATAL_ERROR "git tool not found")
+if(NOT GIT_FOUND)
+  message(FATAL_ERROR "git not found")
 endif()
 
 #
@@ -37,10 +69,10 @@ endfunction()
 #   status  ...   <rev-number><status-modifier>
 #   number  ...   <rev-number>
 #
-function(get_svn_revision revision)
+function(get_git_version version)
   set(output "")
-  execute_process(COMMAND ${svnversion_tool} "${PROJECT_SOURCE_DIR}" OUTPUT_VARIABLE output OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(${revision} "${output}" PARENT_SCOPE)
+  execute_process(COMMAND ${GIT_EXECUTABLE} "rev-list" "HEAD" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE output OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(${version} "${output}" PARENT_SCOPE)
 endfunction()
 
 #
@@ -49,30 +81,24 @@ endfunction()
 function(generate_version_info)
 
   # get svn revision via svnversion tool (outputs e.g. <rev-number>M for modified source tree)
-  get_svn_revision(svn_revision)
+  get_git_version(git_version)
 
   if( NOT EXISTS "${generate_version_gen_hpp}" OR
       NOT EXISTS "${generate_version_gen_fwd_hpp}" OR
       NOT EXISTS "${generate_version_gen_cpp}" )
-    set(SVN_REVISION "" CACHE INTERNAL "IDS SVN Revision String" FORCE)
+    set(VERSION "" CACHE INTERNAL "Version String" FORCE)
   endif()
 
-  if(SVN_REVISION)
-    if ("${SVN_REVISION}" STREQUAL "${svn_revision}")
+  if(VERSION)
+    if ("${VERSION}" STREQUAL "${git_version}")
       log_info("Version information has not changed - skipping file generation")
       return()
     endif()
   endif()
 
-  log_info("Version information has changed ('${SVN_REVISION}' -> '${svn_revision}') - rebuilding version info files ...")
-  set(SVN_REVISION "${svn_revision}" CACHE INTERNAL "IDS SVN Revision String" FORCE)
+  log_info("Version information has changed ('${VERSION}' -> '${git_version}') - rebuilding version info files ...")
+  set(VERSION "${git_version}" CACHE INTERNAL "Version String" FORCE)
 
-  # get full git info about current project
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} module)
-
-  # Extract directory name from the project name 
-  # (by removing  prefix and adding ids/ later)
-  #string(REGEX REPLACE "" "" top_level_generation_path ${PROJECT_NAME})
   set(top_level_generation_path "include")
   set(GENERATION_DIR generated/${top_level_generation_path})
 
@@ -92,12 +118,8 @@ function(generate_version_info)
   version_set_value_or_default(BUILD_TYPE         "${version_info_BUILD_TYPE}"         "${CMAKE_BUILD_TYPE}")
   version_set_value_or_default(BUILD_COMMENT      "${version_info_BUILD_COMMENT}"      "<undefined>")                #FIXME   
 
-  if("${BUILD_SVN_REVISION}" STREQUAL "0")
-    set(BUILD_COMMENT "${BUILD_COMMENT}, sources not checked in")
-  endif()
-
   # set revision number 
-  set(VERSION "${svn_revision}")
+  set(VERSION "${git_version}")
 
   # set compiler version
   set(C_COMPILER_VERSION    "${C_COMPILER_VERSION}")

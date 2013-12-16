@@ -64,8 +64,8 @@ endfunction(log_info)
 # Wrapper function for generating debug output
 # The function just calls message() with appropriate parameters
 # to create a common look and feel for the output.
-# The output is only generated if IDS_ENABLE_LOG_DEBUG is true or
-# if the environment variable IDS_ENABLE_LOG_DEBUG is defined.
+# The output is only generated if ENABLE_LOG_DEBUG is true or
+# if the environment variable ENABLE_LOG_DEBUG is defined.
 #
 # All additional parameters ${ARGN} are passed to message()
 # without modification.
@@ -75,11 +75,11 @@ endfunction(log_info)
 function(log_debug)
   set(DO_PRINT "no")
 
-  if($ENV{IDS_ENABLE_LOG_DEBUG})
+  if($ENV{ENABLE_LOG_DEBUG})
     set(DO_PRINT "yes")
   endif()
 
-  if(${IDS_ENABLE_LOG_DEBUG})
+  if(${ENABLE_LOG_DEBUG})
     set(DO_PRINT "yes")
   endif()
 
@@ -98,7 +98,7 @@ endfunction(log_debug)
 # Wrapper function for generating fixme output
 # The function just calls message() with appropriate parameters
 # to create a common look and feel for the output.
-# The output is only generated if IDS_ENABLE_LOG_FIXME is true.
+# The output is only generated if ENABLE_LOG_FIXME is true.
 #
 # All additional parameters ${ARGN} are passed to message()
 # without modification.
@@ -106,7 +106,7 @@ endfunction(log_debug)
 # as the project name.
 #
 function(log_fixme)
-  if(${IDS_ENABLE_LOG_FIXME})
+  if(${ENABLE_LOG_FIXME})
     if(NOT PROJECT_NAME)
       set(project_name "generic")
     else()
