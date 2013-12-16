@@ -1,4 +1,3 @@
-
 project(common)
 
 include(build_functions)

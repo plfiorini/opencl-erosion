@@ -2,9 +2,12 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-class Module
+namespace mkay
 {
-public:
-};
+  class Module
+  {
+  public:
+  };
+} // namespace mkay
 
 #endif // __MODULE_H__

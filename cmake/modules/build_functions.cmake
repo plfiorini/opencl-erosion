@@ -8,14 +8,29 @@ include(installation)
 # Valid types are "STATIC" and "SHARED"
 #
 function(assert_library_type library_type)
-
   string(TOUPPER ${library_type} library_type)
   if((NOT ${library_type} STREQUAL "STATIC") AND
      (NOT ${library_type} STREQUAL "SHARED"))
      log_fatal_error("Unknown library_type (${library_type}) specified.")
   endif()
-
 endfunction(assert_library_type)
+
+# 
+# add the namespace prefix to every library name
+#
+function(private_add_project_libraries target_name)
+  set(link_libraries "")
+
+  foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
+    log_info("adding lib ${PROJECT_NAMESPACE}${ll}")
+    list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
+  endforeach()
+
+  # Link libraries
+  target_link_libraries(${target_name} 
+    ${link_libraries}
+  )
+endfunction(private_add_project_libraries)
 
 #
 # This function generates makefile code for a standard library
@@ -46,6 +61,8 @@ function(private_add_standard_lib library_type)
   # if specified INSTALL_PKG holds the tools installation package name
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
+  set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
+
   # The source files
   file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
 
@@ -56,14 +73,12 @@ function(private_add_standard_lib library_type)
   add_version_info()
 
   assert_library_type(${library_type})
-  add_library(${PROJECT_NAME} ${library_type}
+  add_library(${TARGET_NAME} ${library_type}
     ${${PROJECT_NAME}_srcs}
   )
 
-  # Link other libraries
-  target_link_libraries(${PROJECT_NAME} 
-    ${INSTALL_UNPARSED_ARGUMENTS}
-  )
+  # add link libraries from unparsed arguments
+  private_add_project_libraries(${TARGET_NAME})
 
   # Handle the test cases
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
@@ -80,7 +95,7 @@ function(private_add_standard_lib library_type)
   install_library(${library_type})
 
   # set build output properties (only for dynamic libs)
-  set_target_properties( ${PROJECT_NAME}
+  set_target_properties( ${TARGET_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
   )
@@ -116,6 +131,8 @@ function(private_add_standard_module library_type)
   # if specified INSTALL_PKG holds the tools installation package name
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
+  set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
+
   # The source files
   file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
 
@@ -127,14 +144,12 @@ function(private_add_standard_module library_type)
 
   # create library
   assert_library_type(${library_type})
-  add_library(${PROJECT_NAME} ${library_type}
+  add_library(${TARGET_NAME} ${library_type}
     ${${PROJECT_NAME}_srcs}
   )
 
-  # Link other libraries
-  target_link_libraries(${PROJECT_NAME} 
-    ${INSTALL_UNPARSED_ARGUMENTS}
-  )
+  # add link libraries from unparsed arguments
+  private_add_project_libraries(${TARGET_NAME})
 
   # Handle the test cases
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
@@ -151,7 +166,7 @@ function(private_add_standard_module library_type)
   install_library(${library_type})
 
   # set build output properties (only for dynamic modules)
-  set_target_properties( ${PROJECT_NAME}
+  set_target_properties( ${TARGET_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/modules"
   )
@@ -177,6 +192,9 @@ function(add_standard_executable)
   # if specified INSTALL_PKG holds the tools installation package name
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
+  set(PROJECT_NAMESPACE "" PARENT_SCOPE)
+  set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
+
   # The source files
   file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
 
@@ -187,13 +205,24 @@ function(add_standard_executable)
   add_version_info()
 
   # The binary of the tool
-  add_executable(${PROJECT_NAME} 
+  add_executable(${TARGET_NAME} 
     ${${PROJECT_NAME}_srcs}
   )
 
+  # add link libraries from unparsed arguments
+  set(link_libraries "")
+
+  foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
+    log_info("adding lib ${PROJECT_NAMESPACE}${ll}")
+    list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
+    log_info("adding lib dependencies from ${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}")
+    log_info("content: ${${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}}")
+    list(APPEND ${link_libraries} "${${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}}")
+  endforeach()
+
   # Link libraries
-  target_link_libraries(${PROJECT_NAME} 
-    ${INSTALL_UNPARSED_ARGUMENTS}
+  target_link_libraries(${target_name} 
+    ${link_libraries}
   )
 
   # Installation instructions for the library
@@ -204,7 +233,7 @@ function(add_standard_executable)
   endif()
 
   # set build output properties (only for executables)
-  set_target_properties( ${PROJECT_NAME}
+  set_target_properties( ${TARGET_NAME}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/bin"
   )

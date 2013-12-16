@@ -4,8 +4,11 @@
 
 #include <common/include/Module.h>
 
-class Erosion : public Module
+namespace mkay
 {
-};
+  class Erosion : public Module
+  {
+  };
+} // namespace mkay
 
 #endif // __MODULE_EROSION_H__

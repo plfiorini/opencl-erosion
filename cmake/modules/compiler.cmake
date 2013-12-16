@@ -18,10 +18,11 @@ if(CMAKE_CXX_COMPILER)
   # set legacy variable for backward compatibility
   set(GCC_VERSION "${GCC_MAJOR}.${GCC_MINOR}" CACHE STRING "Used major and minor version of gcc")
   
+  add_cxx_flags("-Wall")
   if ( "${GCC_VERSION}" STREQUAL "4.6" )
-    add_cxx_flags("-std=c++0x")
+    force_cxx_std("c++0x")
   elseif ( "${GCC_VERSION}" STREQUAL "4.7" )
-    add_cxx_flags("-std=c++11")
+    force_cxx_std("c++11")
   endif()
 
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} "--version"

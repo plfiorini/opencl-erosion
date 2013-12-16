@@ -71,7 +71,7 @@ endfunction()
 #
 function(get_git_version version)
   set(output "")
-  execute_process(COMMAND ${GIT_EXECUTABLE} "rev-list" "HEAD" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE output OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND ${GIT_EXECUTABLE} "rev-list" "--max-count=1" "HEAD" WORKING_DIRECTORY ${PROJECT_SOURCE_DIR} OUTPUT_VARIABLE output OUTPUT_STRIP_TRAILING_WHITESPACE)
   set(${version} "${output}" PARENT_SCOPE)
 endfunction()
 

@@ -13,6 +13,12 @@ include(cache)
 # include compiler info
 include(compiler)
 
+# include third party lib functions
+include(third_party)
+
+# include build functions
+include(build_functions)
+
 # include the versioning module to generate version headers
 include(versioning)
 generate_version_info()

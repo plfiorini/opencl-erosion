@@ -1,7 +1,3 @@
-
-# set installer prefix
-set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "Set the install prefix" FORCE)
-
 #
 # set the INSTALL_PKG var if unset
 #
@@ -43,7 +39,7 @@ endfunction(install_headers)
 #
 function(install_special_binary)
     set_pkg_if_unset("tools")
-    install(TARGETS ${PROJECT_NAME} 
+    install(TARGETS ${TARGET_NAME} 
       DESTINATION sbin
       COMPONENT ${INSTALL_PKG})
 endfunction(install_special_binary)
@@ -55,7 +51,7 @@ endfunction(install_special_binary)
 #
 function(install_binary)
     set_pkg_if_unset("tools")
-    install(TARGETS ${PROJECT_NAME} 
+    install(TARGETS ${TARGET_NAME} 
       DESTINATION bin
       COMPONENT ${INSTALL_PKG})
 endfunction(install_binary)
@@ -69,7 +65,7 @@ function(install_library library_type)
     else()
         set(INSTALL_PKG "core")
     endif()
-    install(TARGETS ${PROJECT_NAME} 
+    install(TARGETS ${TARGET_NAME} 
       DESTINATION lib
       COMPONENT ${INSTALL_PKG})
 endfunction(install_library)

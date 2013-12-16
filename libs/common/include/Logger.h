@@ -2,7 +2,6 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-
 /**
  * Basic Idea for Logging Class from Petru Marginean's Article
  * for more information see
@@ -13,73 +12,79 @@
 #include <sstream>
 #include <vector>
 #include <map>
+#include <cstdint>
 
-#include <boost/cstdint.hpp>
+#include "Log_level.h"
 
-#include "LogLevel.h"
-
-typedef std::basic_ostream<char, std::char_traits<char> > LogOstream;
-
-class Log
+namespace mkay
 {
-public:
-  Log();
-  ~Log();
+  typedef std::basic_ostream<char, std::char_traits<char> > Log_ostream;
 
-  std::ostringstream &Get( LogLevel level, 
-                           char const * i_pFilePath,
-                           char const * i_pFunctionName,
-                           boost::int32_t const i_LineNo );
-
-  static void SetWriteTime( bool i_WriteTime ) { ms_WriteTime = i_WriteTime; }
-
-  static LogLevel GetVerbosity() { return ms_Verbosity; }
-  /// set the logging verbosity, all messages with level <= verbosity are logged
-  static void SetVerbosity(LogLevel i_Verbosity) { ms_Verbosity = i_Verbosity; }
-
-  static void AddLoggingDestination(LogLevel i_Level, LogOstream *i_LoggingDest) 
+  class Logger
   {
-    ms_LoggingDestinations[i_Level].push_back(i_LoggingDest); 
-  }
-  static void AddLoggingDestination(LogLevel i_Level, std::ofstream *i_LoggingDest) 
-  {
-    ms_LoggingDestinations[i_Level].push_back(reinterpret_cast<LogOstream *>(i_LoggingDest)); 
-  }
+  public:
+    Logger() {}
+    ~Logger();
 
-  /**
-   * Init Logging with defaults
-   *  - a logfile
-   *  - log err&fatal to logerr, all other things to loginf
-   */
-  static void InitDefaults(std::ofstream *i_LogFile = NULL, bool i_WriteTime = false);
+    std::ostringstream &get( Log_level level
+                           , char const * i_pFilePath
+                           , char const * i_pFunctionName
+                           , int32_t const i_LineNo );
 
-protected:
-  std::ostringstream m_OS;
+    static void set_write_time_prefix( bool i_write_time_prefix ) { ms_write_time_prefix = i_write_time_prefix; }
 
-  static bool ms_WriteTime;
-  static LogLevel ms_Verbosity;
-  static std::map<LogLevel, std::vector<LogOstream *> > ms_LoggingDestinations;
+    static Log_level get_verbosity() { return ms_verbosity; }
+    
+    /// set the logging verbosity, all messages with level <= verbosity are logged
+    static void set_verbosity(Log_level i_verbosity) { ms_verbosity = i_verbosity; }
 
-private:
-  Log(const Log&);
-  Log& operator=(const Log&);
+    static void add_logging_destination(Log_level i_level, Log_ostream *i_logging_destination) 
+    {
+      ms_logging_destinations[i_level].push_back(i_logging_destination); 
+    }
+    static void add_logging_destination(Log_level i_level, std::ofstream *i_logging_destination) 
+    {
+      ms_logging_destinations[i_level].push_back(reinterpret_cast<Log_ostream *>(i_logging_destination)); 
+    }
 
-  LogLevel m_MessageLevel;
+    /***
+     * Init Logging with defaults:
+     *  - a logfile (if not null)
+     *  - log err&fatal to cerr, all other things to cout
+     */
+    static void init_defaults(std::ofstream *i_log_file = NULL, bool i_write_time_prefix = false);
 
-  void WritePrefix(char const * i_pFilePath, char const * i_pFunctionName, boost::int32_t const i_LineNo);
-};
+  protected:
+    std::ostringstream m_output_stream;
 
+    static bool ms_write_time_prefix;
+    static Log_level ms_verbosity;
+    static std::map<Log_level, std::vector<Log_ostream *> > ms_logging_destinations;
+
+  private:
+    Logger(const Logger&);
+    Logger& operator=(const Logger&);
+
+    Log_level m_message_level;
+
+    void write_prefix(char const * i_file_path, char const * i_function_name, int32_t const i_line_no);
+  };
+
+} // namespace mkay
+  
 // convenience macros
 #define LOG(level)                        \
-  if( level <= Log::GetVerbosity() )      \
-    Log().Get(level, __FILE__, __FUNCTION__, __LINE__) 
+  if( level <= Logger::get_verbosity() )     \
+    Logger().get(level, __FILE__, __FUNCTION__, __LINE__) 
 
-#define logdet    LOG(LogLevel::Detail)
-#define loginf    LOG(LogLevel::Info)
-#define logwarn   LOG(LogLevel::Warning)
-#define logerr    LOG(LogLevel::Error)
-#define logfat    LOG(LogLevel::Fatal)
+#define logdeb    LOG(Log_level::Debug)
+#define logdet    LOG(Log_level::Detail)
+#define loginf    LOG(Log_level::Info)
+#define logwarn   LOG(Log_level::Warning)
+#define logerr    LOG(Log_level::Error)
+#define logfat    LOG(Log_level::Fatal)
 
-#include "LogUtilFunc.h"
+// include log util functions
+#include "Log_util_func.h"
 
 #endif // __LOGGER_H__

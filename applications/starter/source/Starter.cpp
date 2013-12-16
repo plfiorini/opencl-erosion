@@ -1,6 +1,16 @@
 #include <iostream>
 
+#include <common/include/Logger.h>
+#include <database/include/Database.h>
+
+using namespace mkay;
+using namespace std;
+
 int main(void)
 {
-  std::cout << "Hello, World!" << std::endl;
+  Logger::init_defaults();
+  
+  loginf << "starting up ..." << endl;
+  
+  Database db("test.sqlite");
 }
