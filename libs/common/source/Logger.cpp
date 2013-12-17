@@ -91,7 +91,8 @@ namespace mkay
       case Log_level::Warning:  m_output_stream << "WARN  "; break;
       case Log_level::Info:     m_output_stream << "INFO  "; break;
       case Log_level::Detail:   m_output_stream << "DETAIL"; break;
-      default:                  m_output_stream << "<UNKNWN>"; break;
+      case Log_level::Debug:    m_output_stream << "DEBUG "; break;
+      default:                  m_output_stream << "UNKNWN"; break;
     }
 
     // get filename from path

@@ -25,11 +25,13 @@ generate_version_info()
 
 # Extend include path for all libraries
 include_directories(
-  ${CMAKE_CURRENT_SOURCE_DIR}/libs
-  ${CMAKE_CURRENT_BINARY_DIR}
+  ${CMAKE_HOME_DIRECTORY}/libs
+  ${CMAKE_BINARY_DIR}
+  ${CMAKE_BINARY_DIR}/output/third_party/include
 )
 
 # include subdirs
+add_subdirectory(third_party)
 add_subdirectory(libs)
 add_subdirectory(modules)
 add_subdirectory(applications)

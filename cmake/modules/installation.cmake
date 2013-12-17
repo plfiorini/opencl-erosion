@@ -39,7 +39,7 @@ endfunction(install_headers)
 #
 function(install_special_binary)
     set_pkg_if_unset("tools")
-    install(TARGETS ${TARGET_NAME} 
+    install(TARGETS ${PROJECT_NAME} 
       DESTINATION sbin
       COMPONENT ${INSTALL_PKG})
 endfunction(install_special_binary)
@@ -51,7 +51,7 @@ endfunction(install_special_binary)
 #
 function(install_binary)
     set_pkg_if_unset("tools")
-    install(TARGETS ${TARGET_NAME} 
+    install(TARGETS ${PROJECT_NAME} 
       DESTINATION bin
       COMPONENT ${INSTALL_PKG})
 endfunction(install_binary)
@@ -65,7 +65,7 @@ function(install_library library_type)
     else()
         set(INSTALL_PKG "core")
     endif()
-    install(TARGETS ${TARGET_NAME} 
+    install(TARGETS ${PROJECT_NAME} 
       DESTINATION lib
       COMPONENT ${INSTALL_PKG})
 endfunction(install_library)

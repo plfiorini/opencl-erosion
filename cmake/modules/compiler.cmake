@@ -1,6 +1,5 @@
-
-include(build_functions)
 include(logging)
+include(build_functions)
 
 #
 # figure out gcc version
@@ -50,4 +49,3 @@ if(CMAKE_C_COMPILER)
 else()
   log_warning("compiler.cmake: CMAKE_C_COMPILER not defined!")
 endif()
-

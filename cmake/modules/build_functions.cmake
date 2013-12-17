@@ -1,4 +1,5 @@
 include(CMakeParseArguments)
+include(ExternalProject)
 
 include(versioning)
 include(installation)
@@ -22,8 +23,14 @@ function(private_add_project_libraries target_name)
   set(link_libraries "")
 
   foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
-    log_info("adding lib ${PROJECT_NAMESPACE}${ll}")
-    list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
+    set(target ${PROJECT_NAMESPACE}${ll})
+    if(TARGET ${target})
+      log_info("Adding lib ${PROJECT_NAMESPACE}${ll}")
+      list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
+    else()
+      log_info("Adding lib ${ll}")
+      list(APPEND link_libraries "${ll}")
+    endif()
   endforeach()
 
   # Link libraries
@@ -73,12 +80,12 @@ function(private_add_standard_lib library_type)
   add_version_info()
 
   assert_library_type(${library_type})
-  add_library(${TARGET_NAME} ${library_type}
+  add_library(${PROJECT_NAME} ${library_type}
     ${${PROJECT_NAME}_srcs}
   )
 
   # add link libraries from unparsed arguments
-  private_add_project_libraries(${TARGET_NAME})
+  private_add_project_libraries(${PROJECT_NAME})
 
   # Handle the test cases
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
@@ -95,9 +102,10 @@ function(private_add_standard_lib library_type)
   install_library(${library_type})
 
   # set build output properties (only for dynamic libs)
-  set_target_properties( ${TARGET_NAME}
+  set_target_properties( ${PROJECT_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
+    OUTPUT_NAME ${PROJECT_NAMESPACE}${PROJECT_NAME}
   )
 
 endfunction(private_add_standard_lib)
@@ -131,8 +139,6 @@ function(private_add_standard_module library_type)
   # if specified INSTALL_PKG holds the tools installation package name
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
-  set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
-
   # The source files
   file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
 
@@ -144,12 +150,12 @@ function(private_add_standard_module library_type)
 
   # create library
   assert_library_type(${library_type})
-  add_library(${TARGET_NAME} ${library_type}
+  add_library(${PROJECT_NAME} ${library_type}
     ${${PROJECT_NAME}_srcs}
   )
 
   # add link libraries from unparsed arguments
-  private_add_project_libraries(${TARGET_NAME})
+  private_add_project_libraries(${PROJECT_NAME})
 
   # Handle the test cases
   if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test")
@@ -166,14 +172,15 @@ function(private_add_standard_module library_type)
   install_library(${library_type})
 
   # set build output properties (only for dynamic modules)
-  set_target_properties( ${TARGET_NAME}
+  set_target_properties( ${PROJECT_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/modules"
+    OUTPUT_NAME ${PROJECT_NAMESPACE}_module_${PROJECT_NAME}
   )
 endfunction(private_add_standard_module)
 
 #
-# This function generates a makefile code for a standard tool
+# This function generates makefile code for a standard tool
 #
 # The ${PROJECT_NAME} is used to derive several variables
 #
@@ -181,6 +188,7 @@ endfunction(private_add_standard_module)
 #  PKG - When the PKG parameter is given the tool will be added to the specified package
 #  TYPE - Specifies if the tool gets installed to bin or sbin. 
 #         Accepted values: "sbin" for sbin, everything else results in bin
+#
 # Additional parameters ${ARGN} specify libraries, which get linked.
 #
 # e.g.: add_standard_tool(PKG core common ldb)
@@ -192,9 +200,6 @@ function(add_standard_executable)
   # if specified INSTALL_PKG holds the tools installation package name
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
-  set(PROJECT_NAMESPACE "" PARENT_SCOPE)
-  set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
-
   # The source files
   file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
 
@@ -205,23 +210,18 @@ function(add_standard_executable)
   add_version_info()
 
   # The binary of the tool
-  add_executable(${TARGET_NAME} 
+  add_executable(${PROJECT_NAME} 
     ${${PROJECT_NAME}_srcs}
   )
 
   # add link libraries from unparsed arguments
   set(link_libraries "")
 
-  foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
-    log_info("adding lib ${PROJECT_NAMESPACE}${ll}")
-    list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
-    log_info("adding lib dependencies from ${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}")
-    log_info("content: ${${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}}")
-    list(APPEND ${link_libraries} "${${PROJECT_NAMESPACE}${ll}${LIBRARY_DEPENDENCY_POSTFIX}}")
-  endforeach()
+  # add link libraries from unparsed arguments
+  private_add_project_libraries(${PROJECT_NAME})
 
   # Link libraries
-  target_link_libraries(${target_name} 
+  target_link_libraries(${PROJECT_NAME} 
     ${link_libraries}
   )
 
@@ -233,12 +233,111 @@ function(add_standard_executable)
   endif()
 
   # set build output properties (only for executables)
-  set_target_properties( ${TARGET_NAME}
+  set_target_properties( ${PROJECT_NAME}
     PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/bin"
   )
-
 endfunction(add_standard_executable)
+
+#
+# This function generates makefile code for a traditional third party library
+#
+# The ${PROJECT_NAME} is used to derive several variables
+#
+# CMake Parameters:
+#  NAME - Name of the package in the download folder (mandatory)
+#  VERSION - Version of the package in the download folder (mandatory)
+#  PKG - When the PKG parameter is given the tool will be added to the specified package
+#  TYPE - Specifies if the tool gets installed to bin or sbin. 
+#         Accepted values: "sbin" for sbin, everything else results in bin
+#
+# Additional parameters ${ARGN} specify libraries, which get linked.
+#
+function(add_traditional_third_party)
+  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION" "TARGETS;INSTALL_TARGETS;PATCHES" ${ARGN})
+  # if specified TRD_PKG holds the tools installation package name
+  # unrecognized parameters can be found in TRD_UNPARSED_ARGUMENTS
+
+  set(PROJECT_NAMESPACE "" PARENT_SCOPE)
+
+  if(NOT DEFINED TRD_NAME)
+    log_fatal_error("NAME not set!")
+  elseif(NOT DEFINED TRD_VERSION)
+    log_fatal_error("VERSION not set!")
+  endif()
+
+  log_info("Adding traditional third party library: ${PROJECT_NAME} - ${TRD_NAME}")
+
+  set(TRD_INSTALL_DIR ${CMAKE_BINARY_DIR}/output/third_party)
+
+  if(DEFINED TRD_PATCHES)
+    log_debug("Applying Patch: ${TRD_PATCHES}")
+
+    ExternalProject_Add(${PROJECT_NAME}
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ./configure --prefix=${TRD_INSTALL_DIR}
+      PATCH_COMMAND cat ${TRD_PATCHES} | patch --verbose && chmod +x configure
+      BUILD_COMMAND make ${TRD_TARGETS}
+      INSTALL_DIR ${TRD_INSTALL_DIR}
+      INSTALL_COMMAND make ${TRD_INSTALL_TARGETS}
+    )
+#  --strip=1
+  else()
+    ExternalProject_Add(${PROJECT_NAME}
+      URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
+      BUILD_IN_SOURCE 1
+      CONFIGURE_COMMAND ./configure --prefix=${TRD_INSTALL_DIR}
+      BUILD_COMMAND make ${TRD_TARGETS}
+      INSTALL_DIR ${TRD_INSTALL_DIR}
+      INSTALL_COMMAND make ${TRD_INSTALL_TARGETS}
+    )
+  endif()  
+endfunction(add_traditional_third_party)
+
+#
+# This function generates makefile code for a traditional third party library
+#
+# The ${PROJECT_NAME} is used to derive several variables
+#
+# CMake Parameters:
+#  NAME - Name of the package in the download folder (mandatory)
+#  VERSION - Version of the package in the download folder (mandatory)
+#  LIBS - Artifacts of the library (mandatory)
+#  PKG - When the PKG parameter is given the tool will be added to the specified package
+#  TYPE - Specifies if the tool gets installed to bin or sbin. 
+#         Accepted values: "sbin" for sbin, everything else results in bin
+#
+# Additional parameters ${ARGN} specify libraries, which get linked.
+#
+function(add_cmake_third_party)
+  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION;LIBS" "TARGETS;INSTALL_TARGETS;PATCHES" ${ARGN})
+  # if specified TRD_PKG holds the tools installation package name
+  # unrecognized parameters can be found in TRD_UNPARSED_ARGUMENTS
+
+  set(PROJECT_NAMESPACE "" PARENT_SCOPE)
+
+  if(NOT DEFINED TRD_NAME)
+    log_fatal_error("NAME not set!")
+  elseif(NOT DEFINED TRD_VERSION)
+    log_fatal_error("VERSION not set!")
+  elseif(NOT DEFINED TRD_LIBS)
+    log_fatal_error("LIBS not set!")
+  endif()
+
+  log_info("Adding cmake third party library: ${PROJECT_NAME} - ${TRD_NAME}")
+
+  ExternalProject_Add( ${PROJECT_NAME}
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/output/third_party
+  )
+
+  set(libraries "")
+  foreach(lib ${TRD_LIBS})
+    list(APPEND libraries ${CMAKE_BINARY_DIR}/output/third_party/lib/${lib})
+  endforeach()
+  set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
+endfunction(add_cmake_third_party)
 
 #
 # This function just adds the given string to the CXX flag

@@ -24,6 +24,10 @@ namespace mkay
         << errinfo_str("could not open database: "+m_filename)
         << errinfo_cstr(msg);
     }
+    else
+    {
+      logdeb << "database " << m_filename << " opened successfully ..." << std::endl;
+    }
   }
   
   void Database::save()
