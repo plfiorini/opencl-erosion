@@ -12,7 +12,6 @@
 #include <string>
 
 #define PROJECT_NAME_PREFIX       "@(#)PROJECT_NAME:"
-#define PROJECT_DATE_PREFIX       "@(#)PROJECT_DATE:"
 #define PROJECT_COMMENT_PREFIX    "@(#)PROJECT_COMMENT:"
 
 #define BUILD_DATE_PREFIX         "@(#)BUILD_DATE:"
@@ -28,7 +27,6 @@
 namespace Version_info
 {
   char const project_name[] =         PROJECT_NAME_PREFIX         "@PROJECT_NAME@";
-  char const project_date[] =         PROJECT_DATE_PREFIX         "@PROJECT_DATE@";
   char const project_comment[] =      PROJECT_COMMENT_PREFIX      "@PROJECT_COMMENT@";
 
   char const build_date[] =           BUILD_DATE_PREFIX           "@BUILD_DATE@";
@@ -45,11 +43,6 @@ namespace Version_info
   char const * get_project_name()
   {
       return (project_name + sizeof(PROJECT_NAME_PREFIX) - 1);
-  }
-
-  char const * get_project_date()
-  {
-      return (project_date + sizeof(PROJECT_DATE_PREFIX) - 1);
   }
 
   char const * get_project_comment()
@@ -106,12 +99,11 @@ namespace Version_info
          << std::endl;
 
       os << "Project: " << get_project_name()
-         << ", " << get_project_date()
          << ", " << get_project_comment() << std::endl;
 
       os << "Build: " << get_build_date()
-         << "Build Type: " << get_build_type()
-         << "Build Comment: " << get_build_comment() << std::endl;
+         << ", " << get_build_type()
+         << ", " << get_build_comment() << std::endl;
 
       os << "Environment: " << std::endl
          << "  C-Compiler      : " << get_c_compiler_version() << std::endl

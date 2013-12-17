@@ -15,6 +15,8 @@ namespace mkay
   class Exception
     : public boost::exception
   {
+  public:
+    Exception() = default;
   };
 } // namespace mkay
 

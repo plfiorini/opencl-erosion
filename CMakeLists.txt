@@ -1,5 +1,5 @@
 # set project name
-project(erosion)
+project(opencl-erosion)
 
 # CMake requests a specification of the minimum version
 cmake_minimum_required(VERSION 2.8)
@@ -23,9 +23,11 @@ include(build_functions)
 include(versioning)
 generate_version_info()
 
-# Extend include path for all libraries
+# Extend include path for all projects
 include_directories(
+  SYSTEM /usr/include
   ${CMAKE_HOME_DIRECTORY}/libs
+  ${CMAKE_HOME_DIRECTORY}/modules
   ${CMAKE_BINARY_DIR}
   ${CMAKE_BINARY_DIR}/output/third_party/include
 )

@@ -111,12 +111,11 @@ function(generate_version_info)
   set(generate_version_gen_cpp     ${CMAKE_CURRENT_BINARY_DIR}/version_gen.cpp)
 
   version_set_value_or_default(PROJECT_NAME       "${version_info_PROJECT_NAME}"       "${PROJECT_NAME}")
-  version_set_value_or_default(PROJECT_DATE       "${version_info_PROJECT_DATE}"       "${version_info_DATE}")
-  version_set_value_or_default(PROJECT_COMMENT    "${version_info_PROJECT_COMMENT}"    "<undefined>")           #FIXME
+  version_set_value_or_default(PROJECT_COMMENT    "${version_info_PROJECT_COMMENT}"    "no comments")
 
   version_set_value_or_default(BUILD_DATE         "${version_info_BUILD_DATE}"         "${version_info_DATE}")
   version_set_value_or_default(BUILD_TYPE         "${version_info_BUILD_TYPE}"         "${CMAKE_BUILD_TYPE}")
-  version_set_value_or_default(BUILD_COMMENT      "${version_info_BUILD_COMMENT}"      "<undefined>")                #FIXME   
+  version_set_value_or_default(BUILD_COMMENT      "${version_info_BUILD_COMMENT}"      "no comments")
 
   # set revision number 
   set(VERSION "${git_version}")

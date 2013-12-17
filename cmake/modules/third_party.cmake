@@ -35,6 +35,10 @@ function(use_sqlite3)
   )
 endfunction(use_sqlite3)
 
+function(use_boost)
+  
+endfunction(use_boost)
+
 function(use_system_library name)
   log_info("use_system_library: Searching for ${name}")
 
@@ -58,7 +62,7 @@ function(use_third_party_cmake name)
   log_info("use_third_party_cmake: Searching libraries of ${name}")
   foreach(lib ${${name}_LIBS})
     if(NOT EXISTS ${lib})
-      log_fatal_error("${lib} library not found")
+      log_warning("${lib} library not found (yet)")
     else()
       log_info("use_third_party_cmake: Using library ${lib}")
     endif()
@@ -67,4 +71,6 @@ function(use_third_party_cmake name)
       ${lib}
     )
   endforeach()
+
+  add_dependencies(${PROJECT_NAME} ${name})
 endfunction(use_third_party_cmake)

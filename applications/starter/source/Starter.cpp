@@ -1,7 +1,11 @@
 #include <iostream>
 
+#include <common/include/Exception.h>
 #include <common/include/Logger.h>
-#include <database/include/Database.h>
+
+#include <erosion/include/Module_erosion.h>
+
+#include <generated/include/version_gen_fwd.hpp>
 
 #include <GL/gl.h>
 #include <SDL2/SDL.h>
@@ -34,13 +38,8 @@ void checkSDLError(int line = -1)
 #endif
 }
 
-int main(void)
-{
-  Logger::init_defaults();
-  Logger::set_verbosity(Log_level::Debug);
-  
-  loginf << "starting up ..." << endl;
-
+void init_sdl()
+{  
   SDL_Window *mainwindow;
   SDL_GLContext maincontext;
   
@@ -98,4 +97,37 @@ int main(void)
   SDL_GL_DeleteContext(maincontext);
   SDL_DestroyWindow(mainwindow);
   SDL_Quit();
+}
+
+static volatile bool starter_exit = false;
+
+int main(void)
+{
+  Logger::init_defaults();
+  Logger::set_verbosity(Log_level::Debug);
+  
+  loginf << "starting up ..." << endl;
+  
+  loginf << "Version information following" << std::endl 
+         << "Compiled on: " << COMPILATION_DATE << std::endl
+         << Version_info::get_complete_version_info() 
+         << std::endl;
+
+  try
+  {
+    Module_erosion *program = new Module_erosion();
+
+    program->configure();
+    
+    while( false == program->requests_exit() || false == starter_exit)
+    {
+      program->step();
+    }
+    
+    program->shutdown();
+  }
+  catch(Exception const & ex)
+  {
+    logerr << boost::diagnostic_information(ex);
+  }
 }
