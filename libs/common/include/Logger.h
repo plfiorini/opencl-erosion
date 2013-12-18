@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <cstdint>
+#include <cstddef>
 
 #include "Log_level.h"
 
@@ -52,7 +53,7 @@ namespace mkay
      *  - a logfile (if not null)
      *  - log err&fatal to cerr, all other things to cout
      */
-    static void init_defaults(std::ofstream *i_log_file = NULL, bool i_write_time_prefix = false);
+    static void init_defaults(std::ofstream *i_log_file = nullptr, bool i_write_time_prefix = false);
 
   protected:
     std::ostringstream m_output_stream;

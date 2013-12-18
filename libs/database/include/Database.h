@@ -2,7 +2,7 @@
 #ifndef __DATABASE_H__
 #define __DATABASE_H__
 
-#include <common/include/Exception.h>
+#include <common/include/Mkay_exception.h>
 
 struct sqlite3;
 
@@ -13,7 +13,7 @@ namespace mkay
   public:
     Database(std::string const & i_filename)
     : m_filename(i_filename)
-    , m_database(NULL)
+    , m_database(nullptr)
     {
     }
     ~Database();
@@ -29,7 +29,7 @@ namespace mkay
   
   /// define a new exception type
   class Database_exception 
-    : public Exception
+    : public Mkay_exception
   {
   };
 } // namespace mkay

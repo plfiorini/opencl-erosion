@@ -14,6 +14,8 @@ namespace mkay
     virtual void step() = 0;
     virtual void shutdown() = 0;
     virtual bool requests_exit() = 0;
+    
+    virtual ~Module() = 0;
   };
 } // namespace mkay
 

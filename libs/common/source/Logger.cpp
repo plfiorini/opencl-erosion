@@ -14,7 +14,7 @@ namespace mkay
 
   //------------------------------------------------------------------------------
   // STATIC
-  void Logger::init_defaults(std::ofstream *i_log_file /* = NULL */, bool i_write_time_prefix /* = false */)
+  void Logger::init_defaults(std::ofstream *i_log_file /* = nullptr */, bool i_write_time_prefix /* = false */)
   {
     set_verbosity(Log_level::Info);
     set_write_time_prefix(i_write_time_prefix);
@@ -24,7 +24,7 @@ namespace mkay
          ++i )
     {
       add_logging_destination(static_cast<Log_level>(i), &std::cerr);
-      if (i_log_file != NULL)
+      if (i_log_file != nullptr)
       {
         add_logging_destination(static_cast<Log_level>(i), i_log_file);
       }
@@ -34,7 +34,7 @@ namespace mkay
          ++i )
     {
       add_logging_destination(static_cast<Log_level>(i), &std::cout);
-      if (i_log_file != NULL)
+      if (i_log_file != nullptr)
       {
         add_logging_destination(static_cast<Log_level>(i), i_log_file);
       }

@@ -1,6 +1,10 @@
 #include <iostream>
+#include <sstream>
 
-#include <common/include/Exception.h>
+#include <unistd.h>
+#include <signal.h>
+
+#include <common/include/Mkay_exception.h>
 #include <common/include/Logger.h>
 
 #include <erosion/include/Module_erosion.h>
@@ -13,96 +17,75 @@
 using namespace mkay;
 using namespace std;
 
-#define PROGRAM_NAME "Tutorial1"
- 
-/* A simple function that prints a message, the error code returned by SDL,
- * and quits the application */
-void sdldie(const char *msg)
+static volatile bool exit_flag = false;
+
+void signal_handler(int signum) 
 {
-  printf("%s: %s\n", msg, SDL_GetError());
-  SDL_Quit();
-  exit(1);
-}
-  
-void checkSDLError(int line = -1)
-{
-#ifndef NDEBUG
-  const char *error = SDL_GetError();
-  if (*error != '\0')
+  std::stringstream os;
+  os << "received signal: ";
+  switch (signum) 
   {
-    printf("SDL Error: %s\n", error);
-    if (line != -1)
-            printf(" + line: %i\n", line);
-    SDL_ClearError();
+    case SIGHUP:
+      os << "SIGHUP";
+      break;
+    case SIGINT:
+      os << "SIGINT";
+      exit_flag = true;
+      break;
+    case SIGTERM:
+      os << "SIGTERM";
+      exit_flag = true;
+      break;
+    case SIGQUIT:
+      os << "SIGQUIT";
+      exit_flag = true;
+      break;
+    case SIGUSR1:
+      os << "SIGUSR1";
+      break;
+    case SIGPIPE:
+      os << "SIGPIPE";
+      break;
+    case SIGALRM:
+      os << "SIGALRM";
+      break;
+    case SIGCHLD:
+      os << "SIGCHLD";
+      break;
+    case SIGXFSZ:
+      os << "SIGCHLD";
+      break;
+    default:
+      break;
   }
-#endif
+  logdeb << os.str() << std::endl;
 }
 
+/*
 void init_sdl()
-{  
-  SDL_Window *mainwindow;
-  SDL_GLContext maincontext;
-  
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) /* Initialize SDL's Video subsystem */
-      sdldie("Unable to initialize SDL"); /* Or die on error */
-
-  /* Request opengl 3.2 context.
-    * SDL doesn't have the ability to choose which profile at this time of writing,
-    * but it should default to the core profile */
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
-  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
-
-  /* Turn on double buffering with a 24bit Z buffer.
-    * You may need to change this to 16 or 32 for your system */
-  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-  /* Create our window centered at 512x512 resolution */
-  mainwindow = SDL_CreateWindow(PROGRAM_NAME, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      512, 512, SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN);
-  if (!mainwindow) /* Die if creation failed */
-      sdldie("Unable to create window");
-
-  checkSDLError(__LINE__);
-
-  /* Create our opengl context and attach it to our window */
-  maincontext = SDL_GL_CreateContext(mainwindow);
-  checkSDLError(__LINE__);
-
-
-  /* This makes our buffer swap syncronized with the monitor's vertical refresh */
-  SDL_GL_SetSwapInterval(1);
-
-  /* Clear our buffer with a red background */
+{
+  // Clear our buffer with a red background
   glClearColor ( 1.0, 0.0, 0.0, 1.0 );
   glClear ( GL_COLOR_BUFFER_BIT );
-  /* Swap our back buffer to the front */
+  // Swap our back buffer to the front
   SDL_GL_SwapWindow(mainwindow);
-  /* Wait 2 seconds */
+  // Wait 2 seconds
   SDL_Delay(2000);
-
-  /* Same as above, but green */
-  glClearColor ( 0.0, 1.0, 0.0, 1.0 );
-  glClear ( GL_COLOR_BUFFER_BIT );
-  SDL_GL_SwapWindow(mainwindow);
-  SDL_Delay(2000);
-
-  /* Same as above, but blue */
-  glClearColor ( 0.0, 0.0, 1.0, 1.0 );
-  glClear ( GL_COLOR_BUFFER_BIT );
-  SDL_GL_SwapWindow(mainwindow);
-  SDL_Delay(2000);
-
-  /* Delete our opengl context, destroy our window, and shutdown SDL */
-  SDL_GL_DeleteContext(maincontext);
-  SDL_DestroyWindow(mainwindow);
-  SDL_Quit();
 }
-
-static volatile bool starter_exit = false;
+*/
 
 int main(void)
 {
+  signal(SIGHUP,  signal_handler);
+  signal(SIGINT,  signal_handler);
+  signal(SIGQUIT, signal_handler);
+  signal(SIGUSR1, signal_handler);
+  signal(SIGPIPE, signal_handler);
+  signal(SIGALRM, signal_handler);
+  signal(SIGTERM, signal_handler);
+  signal(SIGCHLD, signal_handler);
+  signal(SIGXFSZ, signal_handler);
+  
   Logger::init_defaults();
   Logger::set_verbosity(Log_level::Debug);
   
@@ -110,24 +93,29 @@ int main(void)
   
   loginf << "Version information following" << std::endl 
          << "Compiled on: " << COMPILATION_DATE << std::endl
-         << Version_info::get_complete_version_info() 
-         << std::endl;
+         << Version_info::get_complete_version_info();
 
   try
   {
     Module_erosion *program = new Module_erosion();
 
+    loginf << "configuring module" << std::endl;
     program->configure();
     
-    while( false == program->requests_exit() || false == starter_exit)
+    loginf << "starting execution" << std::endl;
+    while ( false == program->requests_exit() && false == exit_flag )
     {
       program->step();
+      usleep(1000);
     }
     
+    loginf << "commencing shutdown" << std::endl;
     program->shutdown();
   }
-  catch(Exception const & ex)
+  catch (Mkay_exception const & ex)
   {
     logerr << boost::diagnostic_information(ex);
   }
+  
+  loginf << "end of line" << std::endl;
 }

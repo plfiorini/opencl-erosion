@@ -19,7 +19,7 @@ namespace mkay
     if ( SQLITE_OK != sqlite3_open(m_filename.c_str(), &m_database) )
     {
       const char * msg = sqlite3_errmsg(m_database);
-      m_database = NULL;
+      m_database = nullptr;
       throw Database_exception() 
         << errinfo_str("could not open database: "+m_filename)
         << errinfo_cstr(msg);
@@ -54,6 +54,6 @@ namespace mkay
     {
       logdeb << "closed database: " << m_filename << std::endl;
     }
-    m_database = NULL;
+    m_database = nullptr;
   }
 } // namespace mkay

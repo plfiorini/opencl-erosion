@@ -1,3 +1,11 @@
+function(add_include_dependency include_path)
+  log_info("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}") 
+  if(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
+    string(REPLACE "${include_path}" "" deps ${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}})
+  endif()
+  set(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${deps}" "${include_path}" CACHE INTERNAL "${PROJECT_NAME} include dependencies" FORCE)
+endfunction(add_include_dependency)
+
 #
 # This function extends the include path for the use of the sqlite3 library
 # for the project defined by ${PROJECT_NAMESPACE}${PROJECT_NAME}
@@ -33,10 +41,27 @@ function(use_sqlite3)
   target_link_libraries(${PROJECT_NAME}
     ${SQLITE3_LIB}
   )
+
+  add_include_dependency(${SQLITE3_INCLUDE_PATH})
 endfunction(use_sqlite3)
 
+function(use_opencl)
+  find_package(OpenCL REQUIRED)
+
+  include_directories( ${OPENCL_INCLUDE_DIRS} )
+  if( OPENCL_HAS_CPP_BINDINGS )
+    log_info( "OpenCL has CPP bindings. Full include is: " ${OPENCL_INCLUDE_DIRS} )
+  else( OPENCL_HAS_CPP_BINDINGS )
+    log_info( "No OpenCL CPP bindings found" )
+  endif( OPENCL_HAS_CPP_BINDINGS )
+  target_link_libraries(${PROJECT_NAME}
+    ${OPENCL_LIBRARIES}
+  )
+
+  add_include_dependency(${OPENCL_INCLUDE_DIRS})
+endfunction(use_opencl)
+
 function(use_boost)
-  
 endfunction(use_boost)
 
 function(use_system_library name)

@@ -21,23 +21,45 @@ endfunction(assert_library_type)
 #
 function(private_add_project_libraries target_name)
   set(link_libraries "")
-
   foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
-    set(target ${PROJECT_NAMESPACE}${ll})
-    if(TARGET ${target})
-      log_info("Adding lib ${PROJECT_NAMESPACE}${ll}")
-      list(APPEND link_libraries "${PROJECT_NAMESPACE}${ll}")
-    else()
-      log_info("Adding lib ${ll}")
-      list(APPEND link_libraries "${ll}")
+    log_info("Adding lib ${ll}")
+    list(APPEND link_libraries "${ll}")
+
+    # look out for header dependencies of this lib
+    log_info("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
+    set(header_deps "")
+    if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
+      log_info("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
+      foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
+        log_info("Adding include path ${hd}")
+
+        # also add include path to my depencenies
+        add_include_dependency(${hd})
+      endforeach()
     endif()
   endforeach()
 
-  # Link libraries
   target_link_libraries(${target_name} 
     ${link_libraries}
   )
 endfunction(private_add_project_libraries)
+
+function(private_add_project_headers)
+  foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
+    # look out for header dependencies of this lib
+    log_info("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
+    if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
+      log_info("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
+      foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
+        log_info("Adding include path ${hd}")
+        include_directories(${hd})
+
+        # also add include path to my depencenies
+        add_include_dependency(${hd})        
+      endforeach()
+    endif()
+  endforeach()
+endfunction(private_add_project_headers)
 
 #
 # This function generates makefile code for a standard library
@@ -145,8 +167,10 @@ function(private_add_standard_module library_type)
   # Path for internal header files
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
 
-  # generate version info and create dependency of module
+  # add version info dependency
   add_version_info()
+
+  private_add_project_headers()
 
   # create library
   assert_library_type(${library_type})
@@ -175,7 +199,7 @@ function(private_add_standard_module library_type)
   set_target_properties( ${PROJECT_NAME}
     PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/modules"
-    OUTPUT_NAME ${PROJECT_NAMESPACE}_module_${PROJECT_NAME}
+    OUTPUT_NAME ${PROJECT_NAMESPACE}module_${PROJECT_NAME}
   )
 endfunction(private_add_standard_module)
 
@@ -206,8 +230,10 @@ function(add_standard_executable)
   # Path for internal header files
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
 
-  # generate version info and create dependency of lib
+  # add version info dependency
   add_version_info()
+
+  private_add_project_headers()
 
   # The binary of the tool
   add_executable(${PROJECT_NAME} 
