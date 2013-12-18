@@ -6,5 +6,3 @@ add_standard_executable(
   common
   erosion
 )
-
-use_system_library(GL)

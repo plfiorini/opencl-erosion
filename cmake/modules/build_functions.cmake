@@ -126,6 +126,7 @@ function(private_add_standard_lib library_type)
   # set build output properties (only for dynamic libs)
   set_target_properties( ${PROJECT_NAME}
     PROPERTIES
+    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
     OUTPUT_NAME ${PROJECT_NAMESPACE}${PROJECT_NAME}
   )
@@ -337,7 +338,7 @@ endfunction(add_traditional_third_party)
 # Additional parameters ${ARGN} specify libraries, which get linked.
 #
 function(add_cmake_third_party)
-  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION;LIBS" "TARGETS;INSTALL_TARGETS;PATCHES" ${ARGN})
+  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION;LIBS" "TARGETS;INSTALL_TARGETS;PATCHES;PARAMETERS" ${ARGN})
   # if specified TRD_PKG holds the tools installation package name
   # unrecognized parameters can be found in TRD_UNPARSED_ARGUMENTS
 
@@ -348,20 +349,22 @@ function(add_cmake_third_party)
   elseif(NOT DEFINED TRD_VERSION)
     log_fatal_error("VERSION not set!")
   elseif(NOT DEFINED TRD_LIBS)
-    log_fatal_error("LIBS not set!")
+    log_warning("LIBS not set!")
   endif()
 
   log_info("Adding cmake third party library: ${PROJECT_NAME} - ${TRD_NAME}")
 
   ExternalProject_Add( ${PROJECT_NAME}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/output/third_party
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/output/third_party ${TRD_PARAMETERS}
   )
 
   set(libraries "")
-  foreach(lib ${TRD_LIBS})
-    list(APPEND libraries ${CMAKE_BINARY_DIR}/output/third_party/lib/${lib})
-  endforeach()
+  if(${TRD_LIBS})
+    foreach(lib ${TRD_LIBS})
+      list(APPEND libraries ${CMAKE_BINARY_DIR}/output/third_party/lib/${lib})
+    endforeach()
+  endif()
   set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
 endfunction(add_cmake_third_party)
 

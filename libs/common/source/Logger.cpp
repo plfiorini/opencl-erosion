@@ -99,7 +99,7 @@ namespace mkay
     if( i_file_path )
     {
   #ifdef WIN32
-      char *file_name = strrchr(i_file_path, '\\');
+      char const * file_name = strrchr(i_file_path, '\\');
       file_name++;
   #else
       char const *file_name = strrchr(i_file_path, '/');

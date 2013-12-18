@@ -64,13 +64,29 @@ endfunction(use_opencl)
 function(use_boost)
 endfunction(use_boost)
 
+function(use_opengl)
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    use_system_library(GL)
+  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    use_system_library(OpenGL32)  
+  endif()
+
+endfunction(use_opengl)
+
 function(use_system_library name)
   log_info("use_system_library: Searching for ${name}")
 
-  find_library(${name}_LIB ${name}
-    PATHS /usr/lib /usr/lib64
-    DOC "Fully qualified library path of ${name}"
-  )
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    find_library(${name}_LIB ${name}
+      PATHS /usr/lib /usr/lib64
+      DOC "Fully qualified library path of ${name}"
+    )
+  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    find_library(${name}_LIB ${name}
+      PATHS "C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib"
+      DOC "Fully qualified library path of ${name}"
+    )  
+  endif()
 
   if(NOT EXISTS ${${name}_LIB})
     log_fatal_error("use_system_library: ${name} library not found")

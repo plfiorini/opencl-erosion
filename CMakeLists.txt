@@ -26,10 +26,10 @@ generate_version_info()
 # Extend include path for all projects
 include_directories(
   SYSTEM /usr/include
+  SYSTEM ${CMAKE_BINARY_DIR}/output/third_party/include  
   ${CMAKE_HOME_DIRECTORY}/libs
   ${CMAKE_HOME_DIRECTORY}/modules
   ${CMAKE_BINARY_DIR}
-  ${CMAKE_BINARY_DIR}/output/third_party/include
 )
 
 # include subdirs

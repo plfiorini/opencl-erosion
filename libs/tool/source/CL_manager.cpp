@@ -6,7 +6,9 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <GL/glx.h>
+#ifndef WIN32
+	#include <GL/glx.h>
+#endif
 
 using std::vector;
 using std::string;

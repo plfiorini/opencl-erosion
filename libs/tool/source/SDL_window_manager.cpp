@@ -4,6 +4,9 @@
 
 #include <sstream>
 
+#ifdef WIN32
+	#include <Windows.h>
+#endif
 #include <GL/gl.h>
 
 using namespace std;

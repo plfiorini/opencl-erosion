@@ -3,7 +3,11 @@
 set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "Set the install prefix")
 
 # library (& module) build type
-set(LIBRARY_BUILD_TYPE  "SHARED"  CACHE INTERNAL  "Set the library build type (STATIC or SHARED)")
+if(WIN32)
+  set(LIBRARY_BUILD_TYPE  "STATIC"  CACHE INTERNAL  "Set the library build type (STATIC or SHARED)")
+else()
+  set(LIBRARY_BUILD_TYPE  "SHARED"  CACHE INTERNAL  "Set the library build type (STATIC or SHARED)")
+endif()
 
 set(PROJECT_NAMESPACE   "mkay_"    CACHE INTERNAL  "Prefix for project artifacts")
 
