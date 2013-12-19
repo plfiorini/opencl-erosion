@@ -5,20 +5,20 @@
 #include <string>
 #include <SDL2/SDL.h>
 
-#include <tool/include/Dimension.h>
+#include <gfx/include/Dimension.h>
 
 namespace mkay
 {
   class SDL_window_manager
   {
   public:
-    SDL_window_manager(
+    SDL_window_manager();
+    ~SDL_window_manager();
+
+    void create( 
       std::string const & i_window_name,
       dimension32_t const & i_window_size
     );
-    ~SDL_window_manager();
-
-    void create();
     void destroy();
     
     void swap_buffers() 

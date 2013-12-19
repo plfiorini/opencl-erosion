@@ -22,16 +22,16 @@ endfunction(assert_library_type)
 function(private_add_project_libraries target_name)
   set(link_libraries "")
   foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
-    log_info("Adding lib ${ll}")
+    log_debug("Adding lib ${ll}")
     list(APPEND link_libraries "${ll}")
 
     # look out for header dependencies of this lib
-    log_info("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
+    log_debug("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
     set(header_deps "")
     if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
-      log_info("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
+      log_debug("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
       foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
-        log_info("Adding include path ${hd}")
+        log_debug("Adding include path ${hd}")
 
         # also add include path to my depencenies
         add_include_dependency(${hd})
@@ -47,11 +47,11 @@ endfunction(private_add_project_libraries)
 function(private_add_project_headers)
   foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
     # look out for header dependencies of this lib
-    log_info("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
+    log_debug("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
     if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
-      log_info("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
+      log_debug("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
       foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
-        log_info("Adding include path ${hd}")
+        log_debug("Adding include path ${hd}")
         include_directories(${hd})
 
         # also add include path to my depencenies
@@ -349,7 +349,7 @@ function(add_cmake_third_party)
   elseif(NOT DEFINED TRD_VERSION)
     log_fatal_error("VERSION not set!")
   elseif(NOT DEFINED TRD_LIBS)
-    log_warning("LIBS not set!")
+    log_debug("LIBS not set!")
   endif()
 
   log_info("Adding cmake third party library: ${PROJECT_NAME} - ${TRD_NAME}")
@@ -360,13 +360,55 @@ function(add_cmake_third_party)
   )
 
   set(libraries "")
-  if(${TRD_LIBS})
+  if(TRD_LIBS)
     foreach(lib ${TRD_LIBS})
       list(APPEND libraries ${CMAKE_BINARY_DIR}/output/third_party/lib/${lib})
     endforeach()
   endif()
   set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
 endfunction(add_cmake_third_party)
+
+function(add_glsl_shader)
+  if(NOT TARGET ${PROJECT_NAME})
+    log_debug("adding custom target ${PROJECT_NAME}")
+    add_custom_target(${PROJECT_NAME})
+  endif()
+
+  file(GLOB SHADER_HEADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+  )
+  file(GLOB SHADER_FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/*.glsl
+  )
+
+  set(OUTPUT_HEADER ${CMAKE_BINARY_DIR}/output/shaders/${PROJECT_NAME}/include)
+  set(OUTPUT_SHADER ${CMAKE_BINARY_DIR}/output/shaders/${PROJECT_NAME}/source)
+
+  foreach(file_path ${SHADER_HEADER_FILES})
+    get_filename_component(file "${file_path}" NAME)
+    log_debug("adding copy command for ${file} to target ${PROJECT_NAME}")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${file_path} ${OUTPUT_HEADER}/${file}
+    )
+  endforeach()
+
+  foreach(file_path ${SHADER_FILES})
+    get_filename_component(file "${file_path}" NAME)
+    log_debug("adding copy command for ${file} to target ${PROJECT_NAME}")
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+      COMMAND ${CMAKE_COMMAND} -E copy ${file_path} ${OUTPUT_SHADER}/${file}
+    )
+  endforeach()
+
+  private_add_project_headers()
+endfunction(add_glsl_shader)
+
+function(use_shader)
+  foreach(shader ${ARGN})
+    log_debug("adding dependency to ${shader}")
+    add_dependencies(${PROJECT_NAME} ${shader})
+  endforeach()
+endfunction(use_shader)
 
 #
 # This function just adds the given string to the CXX flag

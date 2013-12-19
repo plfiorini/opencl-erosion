@@ -5,8 +5,11 @@
 #include <memory>
 
 #include <module/include/Module.h>
-#include <tool/include/SDL_window_manager.h>
-#include <tool/include/CL_manager.h>
+#include <gfx/include/SDL_window_manager.h>
+#include <gfx/include/Camera.h>
+#include <gfx/include/Skybox.h>
+#include <input/include/SDL_input_manager.h>
+#include <cl/include/CL_manager.h>
 
 namespace mkay
 {
@@ -17,15 +20,19 @@ namespace mkay
     virtual void configure();
     virtual void step();
     virtual void shutdown();
-    virtual bool requests_exit() { return m_exit_flag; }
+    virtual bool requests_exit() { return m_input_manager.received_quit_event(); }
     
     Module_erosion();
     virtual ~Module_erosion();
     
   private:
-    volatile bool m_exit_flag = false;
-    std::unique_ptr<SDL_window_manager> m_window_manager;
-    std::unique_ptr<CL_manager> m_cl_manager;
+    SDL_window_manager m_window_manager;
+    SDL_input_manager m_input_manager;
+    CL_manager m_cl_manager;
+    
+    Camera m_camera;
+    
+    Skybox m_skybox;
   };
 } // namespace mkay
 

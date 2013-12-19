@@ -4,5 +4,11 @@ include(build_functions)
 
 add_standard_module(
   module
-  tool
+  gfx
+  input
+  cl
+)
+
+use_shader(
+  skybox
 )

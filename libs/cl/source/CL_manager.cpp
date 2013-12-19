@@ -1,5 +1,5 @@
-#include <tool/include/CL_manager.h>
-#include <tool/include/CL_exception.h>
+#include <cl/include/CL_manager.h>
+#include <cl/include/CL_exception.h>
 #include <common/include/Logger.h>
 
 #include <vector>

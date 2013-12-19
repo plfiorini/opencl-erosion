@@ -1,5 +1,5 @@
-#include <tool/include/SDL_window_manager.h>
-#include <tool/include/SDL_exception.h>
+#include <gfx/include/SDL_window_manager.h>
+#include <gfx/include/SDL_exception.h>
 #include <common/include/Logger.h>
 
 #include <sstream>
@@ -40,14 +40,11 @@ namespace mkay
     }
   }
   
-  SDL_window_manager::SDL_window_manager(
-    string const & i_window_name, 
-    dimension32_t const & i_window_size
-  )
+  SDL_window_manager::SDL_window_manager()
     : m_window(nullptr)
     , m_context()
-    , m_window_name(i_window_name)
-    , m_window_size(i_window_size)
+    , m_window_name()
+    , m_window_size()
   {
   }
   
@@ -58,13 +55,19 @@ namespace mkay
     destroy();
   }
   
-  void SDL_window_manager::create()
+  void SDL_window_manager::create(
+    string const & i_window_name, 
+    dimension32_t const & i_window_size
+  )
   {
     if ( m_window )
     {
       logwarn << "window already created ..." << endl;
       return;
     }
+    
+    m_window_name = i_window_name;
+    m_window_size = i_window_size;
     
     if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
@@ -75,7 +78,7 @@ namespace mkay
     }
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     // turn on double buffering 
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);

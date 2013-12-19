@@ -1,5 +1,5 @@
 function(add_include_dependency include_path)
-  log_info("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}") 
+  log_debug("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}") 
   if(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
     string(REPLACE "${include_path}" "" deps ${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}})
   endif()
@@ -54,19 +54,25 @@ function(use_opencl)
   else( OPENCL_HAS_CPP_BINDINGS )
     log_info( "No OpenCL CPP bindings found" )
   endif( OPENCL_HAS_CPP_BINDINGS )
+
+  log_info("ld path: $ENV{LD_LIBRARY_PATH}")
+
   target_link_libraries(${PROJECT_NAME}
     ${OPENCL_LIBRARIES}
   )
+  log_info("use_opencl: Using ${OPENCL_LIBRARIES}") 
 
   add_include_dependency(${OPENCL_INCLUDE_DIRS})
 endfunction(use_opencl)
 
-function(use_boost)
-endfunction(use_boost)
+#function(use_libsdl2)
+#
+#endfunction(use_libsdl2)
 
 function(use_opengl)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     use_system_library(GL)
+    use_system_library(GLEW)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     use_system_library(OpenGL32)  
   endif()

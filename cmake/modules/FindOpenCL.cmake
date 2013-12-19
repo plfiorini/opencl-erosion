@@ -1,4 +1,6 @@
-# modified to use AMDAPPSDKROOT on new app sdks of amd 
+# modifications:
+#   - use AMDAPPSDKROOT on new app sdks of amd 
+#   - try /usr/lib/fglrx first, then try standard system paths
 #
 # - Try to find OpenCL
 # This module tries to find an OpenCL implementation on your system. It supports
@@ -28,9 +30,13 @@ IF (APPLE)
 	FIND_PATH(OPENCL_INCLUDE_DIRS OpenCL/cl.h DOC "Include for OpenCL on OSX")
 	FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS OpenCL/cl.hpp DOC "Include for OpenCL CPP bindings on OSX")
 
+  log_info("apple")
+
 ELSE (APPLE)
 
 	IF (WIN32)
+
+    log_info("win32")
 
 		FIND_PATH(OPENCL_INCLUDE_DIRS CL/cl.h)
 		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp)
@@ -62,7 +68,8 @@ ELSE (APPLE)
 
 		# Unix style platforms
 		FIND_LIBRARY(OPENCL_LIBRARIES OpenCL
-			PATHS ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH
+			PATHS "/usr/lib/fglrx" ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH "/usr/lib"
+      NO_DEFAULT_PATH
 		)
 
 		GET_FILENAME_COMPONENT(OPENCL_LIB_DIR ${OPENCL_LIBRARIES} PATH)
