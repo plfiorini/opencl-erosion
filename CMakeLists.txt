@@ -1,7 +1,5 @@
 # set project name
-#set(MAIN_PROJECT_NAME "opencl-erosion" CACHE INTERNAL "the solution name" FORCE)
-project(${MAIN_PROJECT_NAME})
-#add_custom_target(${MAIN_PROJECT_NAME})
+project(opencl-erosion)
 
 # CMake requests a specification of the minimum version
 cmake_minimum_required(VERSION 2.8)
@@ -28,7 +26,7 @@ generate_version_info()
 # Extend include path for all projects
 include_directories(
   SYSTEM /usr/include
-  SYSTEM ${CMAKE_BINARY_DIR}/output/third_party/include  
+  SYSTEM ${TRD_STAGE_DIR}/include  
   ${CMAKE_HOME_DIRECTORY}/libs
   ${CMAKE_HOME_DIRECTORY}/modules
   ${CMAKE_HOME_DIRECTORY}/shaders

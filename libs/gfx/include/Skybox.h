@@ -9,6 +9,8 @@
 
 namespace mkay
 {
+
+class Texture;
   class Camera;
   
   class Skybox
@@ -18,8 +20,8 @@ namespace mkay
     void render(Camera & i_camera);
     
   private:
-    std::unique_ptr<Shader_program> m_shader;
-    std::unique_ptr<Texture_cube_map> m_texture;
+    Shader_program *m_shader;
+    Texture_cube_map *m_texture;
     
   };
 } // namespace mkay

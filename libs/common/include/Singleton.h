@@ -26,7 +26,8 @@ namespace mkay
       return *s_instance;
     }
     
-  private:
+  protected:
+    Singleton() = default;
     Singleton(Singleton const &) = delete;
     Singleton & operator=(Singleton const &) = delete;    
   };

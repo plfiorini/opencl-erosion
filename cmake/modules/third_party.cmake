@@ -76,8 +76,17 @@ function(use_opengl)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     use_system_library(OpenGL32)  
   endif()
-
 endfunction(use_opengl)
+
+function(use_devil)
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+    use_system_library(IL)
+    use_system_library(ILU)
+    use_system_library(ILUT)
+  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+    use_system_library(asdfg)
+  endif()
+endfunction(use_devil)
 
 function(use_system_library name)
   log_info("use_system_library: Searching for ${name}")

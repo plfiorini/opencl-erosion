@@ -2,13 +2,21 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x1c\x00o\x00p\x00e\x00n\x00c\x00l\x00-\x00e\x00r\x00o\x00s\x00i\x00o\x00n)
 
 [CMake]
-Build Directory Count=1
+Build Directory Count=2
 CMakeDir=/usr/share/cmake-2.8/Modules
-Current Build Directory Index=0
+Current Build Directory Index=1
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file:///home/muckm/checkouts/opencl-erosion/build
+Build Directory Path=file://./build
+Build Type=Debug
+CMake Binary=file:///usr/bin/cmake
+Environment Profile=
+Extra Arguments=
+Install Directory=file:///usr/local
+
+[CMake][CMake Build Directory 1]
+Build Directory Path=file:///home/eaglo/checkout/opencl-erosion/build
 Build Type=Debug
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=
@@ -29,7 +37,7 @@ Arguments=
 Dependencies=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x04\x00\x00\x00\x1c\x00o\x00p\x00e\x00n\x00c\x00l\x00-\x00e\x00r\x00o\x00s\x00i\x00o\x00n\x00\x00\x00\x18\x00a\x00p\x00p\x00l\x00i\x00c\x00a\x00t\x00i\x00o\x00n\x00s\x00\x00\x00\x0e\x00s\x00t\x00a\x00r\x00t\x00e\x00r\x00\x00\x00\x0e\x00s\x00t\x00a\x00r\x00t\x00e\x00r)
 Dependency Action=Build
 EnvironmentGroup=default
-Executable=file:///home/muckm/checkouts/opencl-erosion/build/output/bin/starter
+Executable=file://./build/output/bin/starter
 External Terminal=konsole --noclose --workdir %workdir -e %exe
 Project Target=opencl-erosion,applications,starter,starter
 Use External Terminal=false

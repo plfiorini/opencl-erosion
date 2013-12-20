@@ -10,14 +10,8 @@ namespace mkay
 {
   void Skybox::init()
   {
-    m_shader = unique_ptr<Shader_program>(
-      new Shader_program("skybox")
-    );
-    m_shader->add_source("skybox/source/vertex.glsl", GL_VERTEX_SHADER);
-    m_shader->add_source("skybox/source/fragment.glsl", GL_FRAGMENT_SHADER);
-    m_shader->build();
-    
-    //m_texture = Ressource_manager::instance().get("cubemap_brightday1");
+    m_shader = RESMAN.get<Shader_program>("skybox");
+    m_texture = RESMAN.get<Texture_cube_map>("cubemap_brightday1");
   }
   
   void Skybox::render(Camera & i_camera)

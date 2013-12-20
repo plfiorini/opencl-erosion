@@ -76,13 +76,7 @@ namespace mkay
     free(name);
   }
   
-  Shader_program::Shader_program(const std::string & i_name)
-    : m_program_id(0)
-    , m_name(i_name)
-  {
-  }
-  
-  void Shader_program::add_source(const char *i_path, GLenum i_type)
+  void Shader_program::add_source(std::string const & i_path, GLenum i_type)
   {
     loginf << "adding source for " 
            << get_shader_type_name(i_type)
@@ -109,12 +103,14 @@ namespace mkay
     file.close();
   }
   
-  void Shader_program::build()
+  void Shader_program::build(std::string const & i_name)
   {
     if ( m_program_id )
     {
       logwarn << "program built already: " << m_program_id << endl;
     }
+  
+    m_name = i_name;
   
     // compile all shader types
     for ( auto & kv : m_shader_source )

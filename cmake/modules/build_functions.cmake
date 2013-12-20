@@ -295,18 +295,16 @@ function(add_traditional_third_party)
 
   log_info("Adding traditional third party library: ${PROJECT_NAME} - ${TRD_NAME}")
 
-  set(TRD_INSTALL_DIR ${CMAKE_BINARY_DIR}/output/third_party)
-
   if(DEFINED TRD_PATCHES)
     log_debug("Applying Patch: ${TRD_PATCHES}")
 
     ExternalProject_Add(${PROJECT_NAME}
       URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ./configure --prefix=${TRD_INSTALL_DIR}
+      CONFIGURE_COMMAND ./configure --prefix=${TRD_STAGE_DIR}
       PATCH_COMMAND cat ${TRD_PATCHES} | patch --verbose && chmod +x configure
       BUILD_COMMAND make ${TRD_TARGETS}
-      INSTALL_DIR ${TRD_INSTALL_DIR}
+      INSTALL_DIR ${TRD_STAGE_DIR}
       INSTALL_COMMAND make ${TRD_INSTALL_TARGETS}
     )
 #  --strip=1
@@ -314,9 +312,9 @@ function(add_traditional_third_party)
     ExternalProject_Add(${PROJECT_NAME}
       URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
       BUILD_IN_SOURCE 1
-      CONFIGURE_COMMAND ./configure --prefix=${TRD_INSTALL_DIR}
+      CONFIGURE_COMMAND ./configure --prefix=${TRD_STAGE_DIR}
       BUILD_COMMAND make ${TRD_TARGETS}
-      INSTALL_DIR ${TRD_INSTALL_DIR}
+      INSTALL_DIR ${TRD_STAGE_DIR}
       INSTALL_COMMAND make ${TRD_INSTALL_TARGETS}
     )
   endif()  
@@ -356,13 +354,13 @@ function(add_cmake_third_party)
 
   ExternalProject_Add( ${PROJECT_NAME}
     URL ${CMAKE_CURRENT_SOURCE_DIR}/download/${TRD_NAME}
-    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_BINARY_DIR}/output/third_party ${TRD_PARAMETERS}
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=${TRD_STAGE_DIR} ${TRD_PARAMETERS}
   )
 
   set(libraries "")
   if(TRD_LIBS)
     foreach(lib ${TRD_LIBS})
-      list(APPEND libraries ${CMAKE_BINARY_DIR}/output/third_party/lib/${lib})
+      list(APPEND libraries ${TRD_STAGE_DIR}/lib/${lib})
     endforeach()
   endif()
   set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
