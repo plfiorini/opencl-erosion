@@ -2,21 +2,13 @@
 BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00\x1c\x00o\x00p\x00e\x00n\x00c\x00l\x00-\x00e\x00r\x00o\x00s\x00i\x00o\x00n)
 
 [CMake]
-Build Directory Count=2
+Build Directory Count=1
 CMakeDir=/usr/share/cmake-2.8/Modules
-Current Build Directory Index=1
+Current Build Directory Index=0
 ProjectRootRelative=./
 
 [CMake][CMake Build Directory 0]
-Build Directory Path=file://./build
-Build Type=Debug
-CMake Binary=file:///usr/bin/cmake
-Environment Profile=
-Extra Arguments=
-Install Directory=file:///usr/local
-
-[CMake][CMake Build Directory 1]
-Build Directory Path=file:///home/eaglo/checkout/opencl-erosion/build
+Build Directory Path=file:///home/eaglo/checkouts/opencl-erosion/build
 Build Type=Debug
 CMake Binary=file:///usr/bin/cmake
 Environment Profile=

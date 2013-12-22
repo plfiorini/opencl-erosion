@@ -3,6 +3,7 @@
 #include <common/include/Logger.h>
 
 #include <vector>
+#include <set>
 
 #include <boost/algorithm/string.hpp>
 
@@ -19,7 +20,7 @@ using std::endl;
   {                                                     \
     BOOST_THROW_EXCEPTION(                              \
       CL_exception()                                    \
-        << errinfo_str(msg)                           \
+        << errinfo_str(msg)                             \
         << errinfo_cstr(get_error_string(error_code))   \
     );                                                  \
   }
@@ -76,6 +77,14 @@ namespace mkay
       case CL_INVALID_GL_OBJECT:                return "Invalid OpenGL object"; 
       case CL_INVALID_BUFFER_SIZE:              return "Invalid buffer size"; 
       case CL_INVALID_MIP_LEVEL:                return "Invalid mip-map level"; 
+#ifdef CL_VERSION_1_2
+      case CL_INVALID_GLOBAL_WORK_SIZE:         return "Invalid global work size";
+      case CL_INVALID_PROPERTY:                 return "Invalid property";
+      case CL_INVALID_IMAGE_DESCRIPTOR:         return "Invalid image descriptor";
+      case CL_INVALID_COMPILER_OPTIONS:         return "Invalid compiler options";
+      case CL_INVALID_LINKER_OPTIONS:           return "Invalid linker options";
+      case CL_INVALID_DEVICE_PARTITION_COUNT:   return "Invalid device partition count";
+#endif
       default:                                  return "Unknown Error"; 
     }
   }
@@ -236,30 +245,61 @@ namespace mkay
     choosen_platform.getInfo((cl_platform_info)CL_PLATFORM_NAME, &platform_name);
     loginf << "selected platform: " << platform_name << endl;
 
-    cl::Device choosen_device = choose_device(choosen_platform, i_device_type);
-    std::string device_name;
-    choosen_device.getInfo((cl_platform_info)CL_DEVICE_NAME, &device_name);
-    loginf << "selected device: " << device_name << endl;
+    cl::Device choosen_device;
+    std::set<cl_device_type> types = { i_device_type, CL_DEVICE_TYPE_GPU, CL_DEVICE_TYPE_CPU };
+    bool device_found = false;
+    for ( auto type = types.begin(); 
+          type!=types.end() && device_found == false;
+          ++type )
+    {
+      try
+      {
+        choosen_device = choose_device(choosen_platform, *type);
+        std::string device_name;
+        choosen_device.getInfo((cl_platform_info)CL_DEVICE_NAME, &device_name);
+        loginf << "selected device: " << device_name << endl;
+        device_found = true;
+      }
+      catch (CL_exception const & ex)
+      {
+        logerr << boost::diagnostic_information(ex);
+      }
+    }
+    
+    if ( !device_found )
+    {
+      BOOST_THROW_EXCEPTION(
+        CL_exception()
+          << errinfo_cstr("no opencl devices found")
+      );      
+    }
+
+    // check for the gl sharing attribute
+    std::string device_extensions;
+    choosen_device.getInfo(CL_DEVICE_EXTENSIONS, &device_extensions);
+    if ( string::npos == device_extensions.find("cl_khr_gl_sharing") )
+    {
+      BOOST_THROW_EXCEPTION(
+        CL_exception()
+          << errinfo_cstr("device has no cl_khr_gl_sharing feature which is mandatory!")
+      );
+    }
 
     // the next step is to get the current opengl context
     // and create an common opencl context from it
-#ifdef WIN32
-    cl_context_properties contextProperties[] =
+    cl_context_properties context_properties[] =
     {
+#ifdef WIN32
       CL_GL_CONTEXT_KHR, (cl_context_properties)wglGetCurrentContext(),
       CL_WGL_HDC_KHR, (cl_context_properties)wglGetCurrentDC(),
       CL_CONTEXT_PLATFORM, (cl_context_properties)(choosen_platform)(),
-      0 // property terminator
-  };
-#else
-    cl_context_properties contextProperties[] =
-    {
+#elif __linux__
       CL_GL_CONTEXT_KHR, (cl_context_properties)glXGetCurrentContext(),
       CL_GLX_DISPLAY_KHR, (cl_context_properties)glXGetCurrentDisplay(),
       CL_CONTEXT_PLATFORM, (cl_context_properties)(choosen_platform)(),
+#endif
       0 // property terminator
     };
-#endif
     
     // prepare vector for the devices we want to use
     m_used_devices.clear();
@@ -267,16 +307,15 @@ namespace mkay
     
     // create context with the coosen devices and properties
     cl_int error;
-    m_context = cl::Context(m_used_devices, contextProperties, NULL, NULL, &error);
-    CL_CHECK( error, "could not create context" );
+    m_context = cl::Context(m_used_devices, context_properties, NULL, NULL, &error);
+    CL_CHECK( error, "could not create cl context" );
 
     // and now that we have a context, create a command queue
-    cl_command_queue_properties cqProperties = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
-    m_command_queue = cl::CommandQueue(m_context, choosen_device, cqProperties, &error);
-    CL_CHECK( error, "could not create commandqueue" );
+    cl_command_queue_properties cq_properties = CL_QUEUE_OUT_OF_ORDER_EXEC_MODE_ENABLE;
+    m_command_queue = cl::CommandQueue(m_context, choosen_device, cq_properties, &error);
+    CL_CHECK( error, "could not create cl commandqueue" );
 
     loginf << "created commandqueue successfully!" << endl;
-    
   }
   
   void CL_manager::shutdown()

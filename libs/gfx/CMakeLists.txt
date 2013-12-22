@@ -8,3 +8,4 @@ add_standard_lib(
 
 use_opengl()
 use_devil()
+use_third_party_cmake(libsdl2)

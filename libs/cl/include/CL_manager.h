@@ -2,7 +2,7 @@
 #ifndef __CL_MANAGER_H__
 #define __CL_MANAGER_H__
 
-#define __CL_ENABLE_EXCEPTIONS
+//#define __CL_ENABLE_EXCEPTIONS
 #include <CL/cl.hpp>
 
 namespace mkay

@@ -15,6 +15,9 @@ namespace mkay
   /// typedef for error information size_t integer
   typedef boost::error_info<struct tag_error_size_t, size_t> errinfo_size_t; 
   
+  /// typedef for error information 32bit integer
+  typedef boost::error_info<struct tag_error_int32_t, int32_t> errinfo_int32_t; 
+  
   class Mkay_exception
     : public boost::exception
     , public virtual std::exception

@@ -3,6 +3,7 @@
 #include <common/include/Logger.h>
 
 #include <sstream>
+#include <list>
 
 #ifdef WIN32
 	#include <Windows.h>
@@ -25,10 +26,11 @@ namespace mkay
       os << "SDL Error: " << error;
       if (line != -1)
         os << " on line " << line;
+      
+      SDL_ClearError();
       if ( !throw_ex )
       {
-        logerr << os.str() << endl;    
-        SDL_ClearError();
+        logerr << os.str() << endl;
       }
       else
       {
@@ -76,34 +78,70 @@ namespace mkay
           << errinfo_cstr("unable to initialize SDL")
       );
     }
+    
+    std::list<std::pair<int,int>> gl_version
+    { 
+      {4,3}, {4,2},
+      {3,3}, {3,2},
+      {2,1}
+    };
+    bool config_ok = false;
+    for ( auto current_version = gl_version.begin();
+          current_version != gl_version.end() && config_ok == false;
+          ++current_version )
+    {     
+      try
+      {
+        loginf << "trying to create window with opengl context " << current_version->first << "." << current_version->second << endl;
+        
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, current_version->first);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, current_version->second);
+        CHECK_SDL_ERROR();
+        
+        SDL_GL_SetAttribute(SDL_GL_SHARE_WITH_CURRENT_CONTEXT, 1); 
+        CHECK_SDL_ERROR();
 
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 4);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+        // turn on double buffering 
+        SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+        // and 24bit Z buffer.
+        SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+        CHECK_SDL_ERROR();
 
-    // turn on double buffering 
-    SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
-    // and 24bit Z buffer.
-    SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
-
-    // create window
-    m_window = SDL_CreateWindow( 
-      m_window_name.c_str(),
-      SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-      get<0>(m_window_size), get<1>(m_window_size),
-      SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN 
-    );
-    if ( !m_window )
+        // create window
+        m_window = SDL_CreateWindow( 
+          m_window_name.c_str(),
+          SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+          get<0>(m_window_size), get<1>(m_window_size),
+          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN 
+        );
+        if ( !m_window )
+        {
+          BOOST_THROW_EXCEPTION(
+            SDL_exception()
+              << errinfo_cstr("unable to create window")
+          );
+        }
+        CHECK_SDL_ERROR_THROW();
+        
+        // create opengl context
+        m_context = SDL_GL_CreateContext(m_window);
+        CHECK_SDL_ERROR_THROW();
+        
+        config_ok = true;
+      }
+      catch(SDL_exception const & ex)
+      {
+        logerr << boost::diagnostic_information(ex);
+      }
+    }
+    
+    if ( !config_ok )
     {
       BOOST_THROW_EXCEPTION(
         SDL_exception()
-          << errinfo_cstr("unable to create window")
+          << errinfo_cstr("no compatible opengl context found")
       );
     }
-    CHECK_SDL_ERROR_THROW();
-    
-    // create opengl context
-    m_context = SDL_GL_CreateContext(m_window);
-    CHECK_SDL_ERROR_THROW();
     
     // This makes our buffer swap syncronized with the monitor's vertical refresh
     SDL_GL_SetSwapInterval(1);

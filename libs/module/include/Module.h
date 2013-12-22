@@ -2,12 +2,9 @@
 #ifndef __MODULE_H__
 #define __MODULE_H__
 
-#include <boost/noncopyable.hpp>
-
 namespace mkay
 {
   class Module
-    : public boost::noncopyable
   {
   public:
     virtual void configure() = 0;
@@ -16,6 +13,13 @@ namespace mkay
     virtual bool requests_exit() = 0;
     
     virtual ~Module() = 0;
+    
+  protected:
+    Module() = default;
+    
+  private:
+    Module(const Module &) = delete;
+    Module & operator=(const Module &) = delete;
   };
 } // namespace mkay
 

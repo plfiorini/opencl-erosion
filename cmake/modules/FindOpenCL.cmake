@@ -65,10 +65,19 @@ ELSE (APPLE)
 		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS "${_OPENCL_INC_CAND}" ENV OpenCL_INCPATH)
 
 	ELSE (WIN32)
+	
+    FIND_PATH( OPENCL_ROOT_DIR
+      NAMES OpenCL/cl.h include/CL/cl.h include/nvidia-current/CL/cl.h
+      PATHS ENV OCLROOT
+            ENV AMDAPPSDKROOT
+            ENV CUDA_PATH
+            ENV INTELOCLSDKROOT
+      PATH_SUFFIXES cuda
+      DOC "OpenCL root directory")
 
 		# Unix style platforms
 		FIND_LIBRARY(OPENCL_LIBRARIES OpenCL
-			PATHS "/usr/lib/fglrx" ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH "/usr/lib"
+			PATHS ${OPENCL_ROOT_DIR}/lib ${OPENCL_ROOT_DIR}/lib64 "/usr/lib/fglrx" ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH "/usr/lib"
       NO_DEFAULT_PATH
 		)
 
@@ -78,8 +87,8 @@ ELSE (APPLE)
 		# The AMD SDK currently does not place its headers
 		# in /usr/include, therefore also search relative
 		# to the library
-		FIND_PATH(OPENCL_INCLUDE_DIRS CL/cl.h PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH)
-		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS ${_OPENCL_INC_CAND} "/usr/local/cuda/include" "/opt/AMDAPP/include" ENV OpenCL_INCPATH)
+		FIND_PATH(OPENCL_INCLUDE_DIRS CL/cl.h PATHS ${_OPENCL_INC_CAND} ${OPENCL_ROOT_DIR}/include ENV OpenCL_INCPATH)
+		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS ${_OPENCL_INC_CAND} ${OPENCL_ROOT_DIR}/include ENV OpenCL_INCPATH)
 
 	ENDIF (WIN32)
 
