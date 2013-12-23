@@ -12,3 +12,7 @@ add_standard_module(
 use_shader(
   skybox
 )
+
+use_boost(
+  program_options
+)

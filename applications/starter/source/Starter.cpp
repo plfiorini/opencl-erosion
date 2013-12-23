@@ -6,7 +6,7 @@
 
 #include <common/include/Mkay_exception.h>
 #include <common/include/Logger.h>
-
+#include <module/include/Configuration_exception.h>
 #include <erosion/include/Module_erosion.h>
 
 #include <generated/include/version_gen_fwd.hpp>
@@ -14,10 +14,16 @@
 #include <GL/gl.h>
 #include <SDL2/SDL.h>
 
+#include <boost/program_options.hpp>
+
 using namespace mkay;
 using namespace std;
 
-static volatile bool exit_flag = false;
+namespace po = boost::program_options;
+
+static volatile bool g_exit_flag = false;
+static std::string g_parameter_description{""};
+static std::string g_program_name{""};
 
 void signal_handler(int signum) 
 {
@@ -30,15 +36,15 @@ void signal_handler(int signum)
       break;
     case SIGINT:
       os << "SIGINT";
-      exit_flag = true;
+      g_exit_flag = true;
       break;
     case SIGTERM:
       os << "SIGTERM";
-      exit_flag = true;
+      g_exit_flag = true;
       break;
     case SIGQUIT:
       os << "SIGQUIT";
-      exit_flag = true;
+      g_exit_flag = true;
       break;
     case SIGUSR1:
       os << "SIGUSR1";
@@ -61,21 +67,80 @@ void signal_handler(int signum)
   logdeb << os.str() << std::endl;
 }
 
-/*
-void init_sdl()
+Module_ptr_t create_module(std::string const & i_module_name)
 {
-  // Clear our buffer with a red background
-  glClearColor ( 1.0, 0.0, 0.0, 1.0 );
-  glClear ( GL_COLOR_BUFFER_BIT );
-  // Swap our back buffer to the front
-  SDL_GL_SwapWindow(mainwindow);
-  // Wait 2 seconds
-  SDL_Delay(2000);
+  Module_ptr_t module;
+  if ( i_module_name == "erosion" )
+  {
+    module = Module_ptr_t( new Module_erosion() );
+  }
+  return module;
 }
-*/
 
-int main(void)
+void build_description(po::options_description & o_description, Module_ptr_t i_program)
+{ 
+  logdeb << "adding generic options" << endl;
+  po::options_description generic("Generic Options");
+  generic.add_options()
+    ("help", "produce help message")
+    ("module", po::value<string>(), "instantiate module name")
+  ;
+  o_description.add(generic);
+  
+  if ( i_program )
+  {
+    logdeb << "adding module options" << endl;
+    po::options_description module("Module Options");
+    i_program->get_options_description(module);
+    o_description.add(module);
+  } 
+  
+  std::stringstream ostr;
+  ostr << o_description;
+  g_parameter_description = ostr.str();
+}
+
+void usage()
 {
+  std::cerr << "Usage: " << g_program_name << " [options]" << endl
+            << g_parameter_description << endl;
+}
+
+void parse_arguments(int argc, char **argv, po::variables_map & i_parameters, Module_ptr_t i_program = Module_ptr_t{})
+{
+  try
+  {
+    loginf << "parsing arguments" << std::endl;
+    po::options_description description;
+    build_description(description, i_program);
+   ;
+    if ( !i_program )
+    {
+      po::command_line_parser clp(argc, argv);
+      po::store( clp.options(description).allow_unregistered().run(), i_parameters);
+    }
+    else
+    {
+      po::store( po::parse_command_line(argc, argv, description), i_parameters);
+    }
+    
+    po::notify(i_parameters);
+  }
+  catch( po::unknown_option const & ex )
+  {
+  }
+  catch( po::required_option const & ex )
+  {
+    logerr << boost::diagnostic_information(ex);
+    usage();
+    exit(3);
+  }
+}
+
+int main(int argc, char ** argv)
+{ 
+  g_program_name = string{argv[0]};
+  
   signal(SIGHUP,  signal_handler);
   signal(SIGINT,  signal_handler);
   signal(SIGQUIT, signal_handler);
@@ -88,7 +153,7 @@ int main(void)
   
   Logger::init_defaults();
   Logger::set_verbosity(Log_level::Debug);
-  
+
   loginf << "starting up ..." << endl;
   
   loginf << "Version information following" << std::endl 
@@ -97,13 +162,57 @@ int main(void)
 
   try
   {
-    Module_erosion *program = new Module_erosion();
-
-    loginf << "configuring module" << std::endl;
-    program->configure();
+    Module_ptr_t program;
+    po::variables_map vm;
+    string module_name;
     
+    // parse default arguments
+    parse_arguments(argc, argv, vm);
+    
+    // get module name if the user entered one
+    if(vm.count("module"))
+    {
+      module_name = vm["module"].as<string>();
+    }
+    
+    // exit if module name is empty or help was called (and module name is empty)
+    if ( module_name.empty() || (vm.count("help") && module_name.empty()) )
+    {
+      usage();
+      exit(1);
+    }
+    
+    // create module name
+    program = create_module(module_name);
+    if ( !program )
+    {
+      logerr << "could not create module: " << module_name << endl;
+      exit(10);
+    }
+    
+    // build description together with program parameters
+    parse_arguments(argc, argv, vm, program);
+    
+    if ( vm.count("help") )
+    {
+      usage();
+      exit(2);
+    }
+
+    try
+    {
+      loginf << "configuring module" << std::endl;
+      program->configure(vm);
+    }
+    catch(Configuration_exception const & config_ex)
+    {
+      logerr << boost::diagnostic_information(config_ex);
+      usage();
+      exit(4);
+    }
+      
     loginf << "starting execution" << std::endl;
-    while ( false == program->requests_exit() && false == exit_flag )
+    while ( false == program->requests_exit() && false == g_exit_flag )
     {
       program->step();
       usleep(1000);

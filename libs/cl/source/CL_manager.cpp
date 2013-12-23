@@ -235,12 +235,12 @@ namespace mkay
 
   void CL_manager::init( 
     cl_device_type i_device_type /* = CL_DEVICE_TYPE_GPU */,
-    std::string const & i_platform_name /*= std::string() */
+    std::string const & i_platform_name_hint /*= std::string() */
   )
   {
     loginf << "initializing OpenCL ..." << endl;
 
-    cl::Platform choosen_platform = choose_platform(i_platform_name);
+    cl::Platform choosen_platform = choose_platform(i_platform_name_hint);
     std::string platform_name;
     choosen_platform.getInfo((cl_platform_info)CL_PLATFORM_NAME, &platform_name);
     loginf << "selected platform: " << platform_name << endl;

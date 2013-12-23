@@ -30,13 +30,9 @@ IF (APPLE)
 	FIND_PATH(OPENCL_INCLUDE_DIRS OpenCL/cl.h DOC "Include for OpenCL on OSX")
 	FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS OpenCL/cl.hpp DOC "Include for OpenCL CPP bindings on OSX")
 
-  log_info("apple")
-
 ELSE (APPLE)
 
 	IF (WIN32)
-
-    log_info("win32")
 
 		FIND_PATH(OPENCL_INCLUDE_DIRS CL/cl.h)
 		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp)

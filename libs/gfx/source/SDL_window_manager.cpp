@@ -52,8 +52,6 @@ namespace mkay
   
   SDL_window_manager::~SDL_window_manager()
   {
-    loginf << "destructor" << endl;
-    
     destroy();
   }
   
@@ -176,11 +174,11 @@ namespace mkay
   
   void SDL_window_manager::destroy()
   {
-    loginf << "destroy" << endl;
+    loginf << "cleanup ..." << endl;
 
     if ( !m_window )
     {
-      logwarn << "window not existing!" << endl;
+      logwarn << "was not initialized - skipping cleanup!" << endl;
       return;
     }
     

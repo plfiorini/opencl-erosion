@@ -6,3 +6,7 @@ add_standard_executable(
   common
   erosion
 )
+
+use_boost(
+  program_options
+)

@@ -139,9 +139,15 @@ namespace mkay
     loginf << "compiling shader: " << get_shader_type_name(i_type) << endl;
     
     GLuint shader_id = glCreateShader(i_type);
+    
+    logdeb << "shader code: " << endl
+           << i_source << endl;
+    
     const char *source_ptr = i_source.c_str();
     glShaderSource(shader_id, 1, static_cast<const GLchar**>(&source_ptr), 0);
     glCompileShader(shader_id);
+    
+    loginf << "compilation finished, getting compiler log" << endl;
     
     // check status of compilation
     GLint status = 0;

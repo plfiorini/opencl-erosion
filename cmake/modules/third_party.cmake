@@ -55,8 +55,6 @@ function(use_opencl)
     log_info( "No OpenCL CPP bindings found" )
   endif( OPENCL_HAS_CPP_BINDINGS )
 
-  log_info("ld path: $ENV{LD_LIBRARY_PATH}")
-
   target_link_libraries(${PROJECT_NAME}
     ${OPENCL_LIBRARIES}
   )
@@ -65,9 +63,13 @@ function(use_opencl)
   add_include_dependency(${OPENCL_INCLUDE_DIRS})
 endfunction(use_opencl)
 
-#function(use_libsdl2)
-#
-#endfunction(use_libsdl2)
+function(use_boost)
+  foreach(lib ${ARGN})
+    log_debug("use_boost: adding boost library ${lib}")
+    set(libname "boost_${lib}")
+    use_system_library(${libname})
+  endforeach()
+endfunction(use_boost)
 
 function(use_opengl)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
@@ -89,7 +91,7 @@ function(use_devil)
 endfunction(use_devil)
 
 function(use_system_library name)
-  log_info("use_system_library: Searching for ${name}")
+  log_debug("use_system_library: Searching for ${name}")
 
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     find_library(${name}_LIB ${name}
@@ -115,7 +117,7 @@ function(use_system_library name)
 endfunction(use_system_library)
 
 function(use_third_party_cmake name)
-  log_info("use_third_party_cmake: Searching libraries of ${name}")
+  log_debug("use_third_party_cmake: Searching libraries of ${name}")
   foreach(lib ${${name}_LIBS})
     if(NOT EXISTS ${lib})
       log_warning("${lib} library not found (yet)")

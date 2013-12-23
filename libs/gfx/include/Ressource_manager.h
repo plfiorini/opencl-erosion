@@ -23,7 +23,7 @@ namespace mkay
     friend class Singleton<Ressource_manager>;
     
   public:    
-    void init(std::list<std::string> const & i_search_path);
+    void init(std::string i_base_path = "", std::list<std::string> const & i_search_paths = std::list<std::string>{});
   
     template<typename T>
     T * get(std::string const & i_name);
