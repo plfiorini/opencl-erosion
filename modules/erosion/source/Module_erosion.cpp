@@ -8,7 +8,7 @@ using namespace std;
 namespace po = boost::program_options;
 
 namespace mkay
-{
+{ 
   Module_erosion::Module_erosion()
     : m_window_manager{}
     , m_input_manager{}
@@ -23,9 +23,9 @@ namespace mkay
   void Module_erosion::get_options_description(po::options_description & o_description)
   {
     o_description.add_options()
-      ("width", po::value<int>(), "window width")
-      ("height", po::value<int>(), "window height")
-      ("ressource_path", po::value<string>()->required(), "path to ressources")
+      ("width", po::value<int>()->default_value(c_default_width), "window width")
+      ("height", po::value<int>()->default_value(c_default_height), "window height")
+      ("ressource_path", po::value<string>()->default_value(c_default_search_path), "path to ressources")
     ;
   }
   
@@ -37,7 +37,7 @@ namespace mkay
     Ressource_manager::instance().init(base_search_path);
     
     m_window_manager = SDL_window_manager{};
-    m_window_manager.create("Erosion", make_tuple(1280, 768));
+    m_window_manager.create("Erosion", make_tuple(c_default_width, c_default_height));
     
     //m_cl_manager = CL_manager{};
     //m_cl_manager.init(CL_DEVICE_TYPE_ALL, "AMD Accelerated Parallel Processing");
@@ -52,7 +52,10 @@ namespace mkay
   void Module_erosion::step()
   {
     m_input_manager.handle_event_loop();
+    m_input_manager.update_camera(m_camera);
 
+    m_skybox.render(m_camera);
+    
     //loginf << "step" << endl;
     m_window_manager.swap_buffers();
   }

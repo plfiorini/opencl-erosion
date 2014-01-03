@@ -15,6 +15,9 @@ namespace mkay
     Texture() = default;
     virtual ~Texture() = default;
     
+    virtual void set(Shader_program* i_shader, GLenum i_tex_unit, const char* i_shader_var);
+    virtual void unset();
+    
   protected: 
     friend class Ressource_manager;
     

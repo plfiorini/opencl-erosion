@@ -12,8 +12,11 @@ namespace mkay
     : public Abstract_texture
   {   
   public:
-    Texture_cube_map() = default;
+    Texture_cube_map();
     virtual ~Texture_cube_map() = default;
+    
+    virtual void set(Shader_program* i_shader, GLenum i_tex_unit, const char* i_shader_var);
+    virtual void unset();
     
   protected:
     friend class Ressource_manager;

@@ -6,6 +6,8 @@
 #include <IL/ilut.h>
 
 #include <memory>
+#include <fstream>
+#include <algorithm>
 
 #include <boost/filesystem.hpp>
 
@@ -71,11 +73,11 @@ namespace mkay
       }
 
       auto object = new Shader_program();
-      object->add_source(vertex_path, GL_VERTEX_SHADER);
-      object->add_source(fragment_path, GL_FRAGMENT_SHADER);      
+      object->set_source(GL_VERTEX_SHADER, load_shader_source(vertex_path) );
+      object->set_source(GL_FRAGMENT_SHADER, load_shader_source(fragment_path) );
       if ( !geometry_path.empty() )
       {
-        object->add_source(geometry_path, GL_GEOMETRY_SHADER);
+        object->set_source(GL_GEOMETRY_SHADER, load_shader_source(geometry_path) );
       }
       object->build(i_name);
       m_shaders[i_name] = object;
@@ -92,7 +94,7 @@ namespace mkay
     for(std::string const & path_prefix : m_search_paths)
     {
       std::string full_path = path_prefix + "/" + i_name;
-      logdeb << "Testing path: " << full_path << endl;
+      logdeb << "testing path: " << full_path << endl;
       
       path p(full_path);
       if (exists(p))
@@ -101,9 +103,97 @@ namespace mkay
       }
     }
     BOOST_THROW_EXCEPTION(
-      Ressource_exception()
-        << errinfo_str("Ressource not found in lookup paths: " + i_name)
+      Ressource_exception{}
+        << errinfo_str{"ressource not found in lookup paths: " + i_name}
     );
+  }
+  
+  string Ressource_manager::load_shader_source(const string& i_path)
+  {
+    ifstream file(i_path);
+    if( !file.is_open() )
+    {
+      BOOST_THROW_EXCEPTION(
+        Ressource_exception{}
+          << errinfo_str{std::string{"could not open file: "} + i_path}
+      );
+    }
+      
+    std::string source;
+    std::string line;
+    while (std::getline(file, line))
+    {
+      size_t pos = line.find("#include");
+      if ( pos != string::npos )
+      {
+        size_t begin = line.find("<");
+        size_t end = line.rfind(">");
+        if ( begin == string::npos || end == string::npos )
+        {
+          BOOST_THROW_EXCEPTION(
+            Ressource_exception{}
+              << errinfo_str{"syntax error in file: " + i_path + " - line: " + line}
+          );
+        }
+        std::string file_name = line.substr(begin+1, (end-begin-1));
+        std::string include_path = lookup_path(file_name);
+        logdeb << "including " << include_path << endl;
+        
+        source += load_shader_include(include_path);
+      }
+      else
+      {
+        source += line + "\n";
+      }      
+    }
+    
+    file.close();
+    
+    return source;
+  }
+
+  std::string Ressource_manager::load_shader_include(std::string const & i_path)
+  {
+    std::ifstream include_file(i_path);
+    if( !include_file.is_open() )
+    {
+      BOOST_THROW_EXCEPTION(
+        Ressource_exception{}
+          << errinfo_str{"could not open include file: " + i_path}            
+      );
+    }
+    
+    std::stringstream source;
+    std::string line;
+    while (std::getline(include_file, line))
+    {
+      size_t pos = line.find("SHADER_VAR(");
+      if ( pos != string::npos )
+      {
+        size_t begin = line.find("(");
+        size_t end = line.find(")");
+        if ( begin == string::npos || end == string::npos )
+        {
+          BOOST_THROW_EXCEPTION(
+            Ressource_exception{}
+              << errinfo_str{"syntax error in file: " + i_path + " - line: " + line}
+          );
+        }
+        
+        std::string varline = line.substr(begin+1, (end-begin-1));
+        std::replace( varline.begin(), varline.end(),
+                      ',', ' ' );
+        source << varline + ";" << endl;
+      }
+      else
+      {
+        source << line << endl;
+      }
+    }
+    
+    include_file.close();
+    
+    return source.str();
   }
   
 } // namespace mkay

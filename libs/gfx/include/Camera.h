@@ -15,6 +15,8 @@ namespace mkay
     
     glm::mat4 get_projection_view_matrix() { return m_projection*m_view; }
     
+    void move(glm::vec3 i_translation);
+    
   private:
     
     glm::vec3 m_virtual_position = glm::vec3(0.0f, 100.0f, 0.0f);

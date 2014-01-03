@@ -9,8 +9,11 @@
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include <common/include/Macros.h>
+
+/// definition macro for shader variables
 #define SHADER_VAR(io, type, name) \
-  const char *name = "name"
+  const char *name = STRINGIFY(name)
 
 namespace mkay
 { 
@@ -19,10 +22,12 @@ namespace mkay
   public:
     Shader_program() = default;
     
-    void add_source(std::string const & i_path, GLenum i_type);    
+    void set_source(GLenum i_type, std::string const && i_source);    
     void build(const std::string & i_name);
     
-    void use() { glUseProgram(m_program_id); }
+    void use() { glUseProgram(m_program_id); } 
+    void disable() { glUseProgram(0); }
+      
     GLint get_uniform_location(const char *i_name);
     
   private:

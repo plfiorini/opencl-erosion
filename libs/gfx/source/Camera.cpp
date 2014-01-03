@@ -44,4 +44,15 @@ namespace mkay
       m_inv_view = inv_rotate_y * inv_rotate_x;
     }
   }
+  
+  void Camera::move(glm::vec3 i_translation)
+  {
+    glm::mat4 invRotateX, invRotateY;
+
+    invRotateY = glm::rotate(invRotateY, -m_rotation.y, Y_AXIS);
+    invRotateX = glm::rotate(invRotateX, -m_rotation.x, m_rotation_axis_x);
+
+    m_translation = glm::vec3(invRotateX * invRotateY * glm::vec4(i_translation, 1.0));
+  }
+
 } // namespace mkay

@@ -26,7 +26,13 @@ namespace mkay
     Module_erosion();
     virtual ~Module_erosion();
     
+    /// static module type name function
+    static const char * get_module_type() { return "erosion"; }
+    
   private:
+    const int32_t c_default_width = 1280, c_default_height = 768;
+    const std::string c_default_search_path = "..";
+    
     SDL_window_manager m_window_manager;
     SDL_input_manager m_input_manager;
     CL_manager m_cl_manager;

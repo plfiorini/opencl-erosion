@@ -7,6 +7,19 @@
 
 #include <gfx/include/Dimension.h>
 
+#ifdef _DEBUG
+  #define GL_CHECK( _msg ) \
+    { \
+      GLenum error = glGetError();  \
+      if( error != GL_NO_ERROR ) \
+      { \
+        logerr << _msg << ": GL Error: " << error << " - " << gluErrorString( error ) << std::endl; \
+      } \
+    }
+#else
+  #define GL_CHECK( _msg )
+#endif
+
 namespace mkay
 {
   class SDL_window_manager

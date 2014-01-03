@@ -8,7 +8,8 @@
 #ifdef WIN32
 	#include <Windows.h>
 #endif
-#include <GL/gl.h>
+#include <GL/glew.h>
+#include <GL/glut.h>
 
 using namespace std;
 
@@ -17,6 +18,95 @@ using namespace std;
 
 namespace mkay
 {
+  void gl_error_callback( 
+    GLenum source, GLenum type, GLuint id, GLuint severity,
+    GLsizei length, const char *message, void *user_parameter )
+  {
+    std::stringstream stringStream;
+    std::string sourceString;
+    std::string typeString;
+    std::string severityString;
+ 
+    switch (source) 
+    {
+    case GL_DEBUG_SOURCE_API_ARB: 
+      sourceString = "API";
+      break;
+    case GL_DEBUG_SOURCE_APPLICATION_ARB: 
+      sourceString = "Application";
+      break;
+    case GL_DEBUG_SOURCE_WINDOW_SYSTEM_ARB: 
+      sourceString = "Window System";
+      break;
+    case GL_DEBUG_SOURCE_SHADER_COMPILER_ARB: 
+      sourceString = "Shader Compiler";
+      break;
+    case GL_DEBUG_SOURCE_THIRD_PARTY_ARB: 
+      sourceString = "Third Party";
+      break;
+    case GL_DEBUG_SOURCE_OTHER_ARB: 
+      sourceString = "Other";
+      break;
+    default: 
+      sourceString = "Unknown";
+      break;
+    }
+ 
+    switch (type) 
+    {
+      case GL_DEBUG_TYPE_ERROR_ARB:
+        typeString = "Error";
+        break;
+      case GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR_ARB: 
+        typeString = "Deprecated Behavior";
+        break;
+      case GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR_ARB:
+        typeString = "Undefined Behavior";
+        break;
+      case GL_DEBUG_TYPE_PORTABILITY_ARB:
+        typeString = "Portability";
+        break;
+      case GL_DEBUG_TYPE_PERFORMANCE_ARB:
+        typeString = "Performance";
+        break;
+      case GL_DEBUG_TYPE_OTHER_ARB:
+        typeString = "Other";
+        break;
+      default:
+        typeString = "Unknown";
+        break;
+    }
+ 
+    switch (severity) 
+    {
+    case GL_DEBUG_SEVERITY_HIGH_ARB:
+      severityString = "High";
+      break;
+    case GL_DEBUG_SEVERITY_MEDIUM_ARB:
+      severityString = "Medium";
+      break;
+    case GL_DEBUG_SEVERITY_LOW_ARB:
+      severityString = "Low";
+      break;
+    default:
+      severityString = "Unknown";
+      break;
+    }
+ 
+    stringStream << "OpenGL Error: " << message;
+    stringStream << " [Source = " << sourceString;
+    stringStream << ", Type = " << typeString;
+    stringStream << ", Severity = " << severityString;
+    stringStream << ", ID = " << id << "]";
+ 
+    logerr << "throwing error ..." << endl;
+    
+    BOOST_THROW_EXCEPTION(
+      SDL_exception()
+        << errinfo_str(stringStream.str())
+    );
+  }
+  
   void check_SDL_error(int line = -1, bool throw_ex = false)
   {
     const char *error = SDL_GetError();
@@ -121,9 +211,27 @@ namespace mkay
         }
         CHECK_SDL_ERROR_THROW();
         
+        // SDL_GL_CONTEXT_PROFILE_CORE
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        CHECK_SDL_ERROR();
+        
         // create opengl context
         m_context = SDL_GL_CreateContext(m_window);
         CHECK_SDL_ERROR_THROW();
+        
+        GLenum err = glewInit();
+        if (err != GLEW_OK)
+        {
+          BOOST_THROW_EXCEPTION(
+            SDL_exception()
+              << errinfo_cstr("glew could not be initialized")
+          );
+        }
+        
+        int argc = 1;
+        char *name = "asdfg";
+        glutInit(&argc, &name);
         
         config_ok = true;
       }
@@ -168,6 +276,9 @@ namespace mkay
       default: os << "unknown(" << profile << ")"; break;
     }
     loginf << os.str() << endl;
+    
+    glDebugMessageCallbackARB(gl_error_callback, nullptr);
+    glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
     
     loginf << "finished init" << endl;
   }

@@ -401,6 +401,20 @@ function(add_glsl_shader)
   private_add_project_headers()
 endfunction(add_glsl_shader)
 
+function(add_textures)
+
+  set(OUTPUT_TEXTURES ${CMAKE_BINARY_DIR}/output/textures)
+  
+  add_custom_command(OUTPUT ${OUTPUT_TEXTURES}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/* ${OUTPUT_TEXTURES}
+  )
+  log_debug("adding custom target ${PROJECT_NAME}")
+  add_custom_target(${PROJECT_NAME} ALL
+    DEPENDS ${OUTPUT_TEXTURES}
+  )
+
+endfunction(add_textures)
+
 function(use_shader)
   foreach(shader ${ARGN})
     log_debug("adding dependency to ${shader}")

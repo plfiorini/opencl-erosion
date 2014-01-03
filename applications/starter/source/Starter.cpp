@@ -67,10 +67,11 @@ void signal_handler(int signum)
   logdeb << os.str() << std::endl;
 }
 
+/// Module Creation Factory
 Module_ptr_t create_module(std::string const & i_module_name)
 {
   Module_ptr_t module;
-  if ( i_module_name == "erosion" )
+  if ( i_module_name == Module_erosion::get_module_type() )
   {
     module = Module_ptr_t( new Module_erosion() );
   }
@@ -83,6 +84,7 @@ void build_description(po::options_description & o_description, Module_ptr_t i_p
   po::options_description generic("Generic Options");
   generic.add_options()
     ("help", "produce help message")
+    ("version,v", "output version information")
     ("module", po::value<string>(), "instantiate module name")
   ;
   o_description.add(generic);
@@ -102,7 +104,8 @@ void build_description(po::options_description & o_description, Module_ptr_t i_p
 
 void usage()
 {
-  std::cerr << "Usage: " << g_program_name << " [options]" << endl
+  std::cerr << endl
+            << "Usage: " << g_program_name << " [options]" << endl
             << g_parameter_description << endl;
 }
 
@@ -110,7 +113,7 @@ void parse_arguments(int argc, char **argv, po::variables_map & i_parameters, Mo
 {
   try
   {
-    loginf << "parsing arguments" << std::endl;
+    logdeb << "parsing arguments" << std::endl;
     po::options_description description;
     build_description(description, i_program);
    ;
@@ -129,11 +132,17 @@ void parse_arguments(int argc, char **argv, po::variables_map & i_parameters, Mo
   catch( po::unknown_option const & ex )
   {
   }
-  catch( po::required_option const & ex )
+  catch( po::invalid_command_line_syntax const & ex )
   {
-    logerr << boost::diagnostic_information(ex);
+    logerr << ex.what() << endl;
     usage();
     exit(3);
+  }
+  catch( po::required_option const & ex )
+  {
+    logerr << ex.what() << endl;
+    usage();
+    exit(4);
   }
 }
 
@@ -153,13 +162,7 @@ int main(int argc, char ** argv)
   
   Logger::init_defaults();
   Logger::set_verbosity(Log_level::Debug);
-
-  loginf << "starting up ..." << endl;
   
-  loginf << "Version information following" << std::endl 
-         << "Compiled on: " << COMPILATION_DATE << std::endl
-         << Version_info::get_complete_version_info();
-
   try
   {
     Module_ptr_t program;
@@ -168,6 +171,14 @@ int main(int argc, char ** argv)
     
     // parse default arguments
     parse_arguments(argc, argv, vm);
+    
+    if(vm.count("version"))
+    {
+      loginf << "Version information following" << endl
+             << "Compiled on: " << COMPILATION_DATE << endl
+             << Version_info::get_complete_version_info() << endl;
+      exit(0);
+    }
     
     // get module name if the user entered one
     if(vm.count("module"))
@@ -208,7 +219,7 @@ int main(int argc, char ** argv)
     {
       logerr << boost::diagnostic_information(config_ex);
       usage();
-      exit(4);
+      exit(5);
     }
       
     loginf << "starting execution" << std::endl;

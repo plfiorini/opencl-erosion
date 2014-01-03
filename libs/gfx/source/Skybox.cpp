@@ -4,6 +4,8 @@
 
 #include <skybox/include/vars.h>
 
+#include <GL/glut.h>
+
 using namespace std;
 
 namespace mkay
@@ -25,6 +27,14 @@ namespace mkay
     
     glUniformMatrix4fv(m_shader->get_uniform_location(model_view_projection), 1, GL_FALSE, glm::value_ptr(MVP) );
     
+    m_texture->set(m_shader, GL_TEXTURE0, tex_cube);
     
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_BLEND);
+    
+    glutSolidCube(1.0f);
+    
+    m_texture->unset();
+
   }
 } // namespace mkay

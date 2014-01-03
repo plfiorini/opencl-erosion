@@ -17,10 +17,11 @@ namespace mkay
   class Abstract_texture
   {
   public:
+    Abstract_texture();
     virtual ~Abstract_texture() = 0;
     
-    void set(Shader_program *i_shader, GLenum i_tex_unit, const char *i_shader_var);
-    void unset();
+    virtual void set(Shader_program *i_shader, GLenum i_tex_unit, const char *i_shader_var) = 0;
+    virtual void unset() = 0;
     
     /// GL_ADD, GL_REPLACE, GL_BEND, GL_MODULATE...
     void set_env_mode(GLuint i_env_mode) { m_env_mode = i_env_mode; }
@@ -37,12 +38,20 @@ namespace mkay
     friend class Ressource_manager;
     
     virtual void load_from(std::string const &i_full_path) = 0;
+    GLubyte * il_load_image_data(std::string const & i_full_path, ILuint & o_image_id);
 
+    static GLfloat get_max_anisotropy()
+    {  
+      float maxAF = 0.0f;
+      glGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &maxAF);
+      return maxAF;
+    }
+    
     GLuint m_tex_id = 0;
     
-    GLuint m_env_mode;
-    GLint m_wrap_s, m_wrap_t;
-    GLfloat m_anisotropic_filter_level;
+    GLuint m_env_mode = GL_MODULATE;
+    GLint m_wrap_s = GL_REPEAT, m_wrap_t = GL_CLAMP;
+    GLfloat m_anisotropic_filter_level = 0.0f;
     
     GLint m_color_channels;
     GLint m_bit_per_channel;    

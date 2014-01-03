@@ -1,5 +1,3 @@
-#include <fstream>
-
 #include <gfx/include/Shader_program.h>
 #include <gfx/include/Shader_exception.h>
 #include <common/include/Logger.h>
@@ -29,7 +27,14 @@ namespace mkay
     GLint infolog_length = 0;
     GLint chars_written  = 0;
     char *info_log = nullptr;
-    glGetShaderiv(i_object_id, GL_INFO_LOG_LENGTH, &infolog_length);
+    if ( is_program )
+    {
+      glGetProgramiv(i_object_id, GL_INFO_LOG_LENGTH, &infolog_length);
+    }
+    else
+    {
+      glGetShaderiv(i_object_id, GL_INFO_LOG_LENGTH, &infolog_length);
+    }
     if (infolog_length > 0)
     {
       info_log = (char *)malloc(infolog_length);
@@ -76,31 +81,13 @@ namespace mkay
     free(name);
   }
   
-  void Shader_program::add_source(std::string const & i_path, GLenum i_type)
+  void Shader_program::set_source(GLenum i_type, std::string const && i_source)
   {
     loginf << "adding source for " 
-           << get_shader_type_name(i_type)
-           << " from " << i_path << endl;
-    
-    ifstream file(i_path);
-    if( !file.is_open() )
-    {
-      BOOST_THROW_EXCEPTION(
-        Shader_exception{}
-          << errinfo_str{std::string{"Could not open file: "} + i_path}
-      );
-    }
+           << get_shader_type_name(i_type) << endl;
     
     // get source which is already stored
-    std::string & source = m_shader_source[i_type];
-    
-    std::string line;
-    while (std::getline(file, line))
-    {
-      source += line + "\n";
-    }
-    
-    file.close();
+    m_shader_source[i_type] = i_source;
   }
   
   void Shader_program::build(std::string const & i_name)
@@ -140,8 +127,8 @@ namespace mkay
     
     GLuint shader_id = glCreateShader(i_type);
     
-    logdeb << "shader code: " << endl
-           << i_source << endl;
+    //logdeb << "shader code: " << endl
+    //       << i_source << endl;
     
     const char *source_ptr = i_source.c_str();
     glShaderSource(shader_id, 1, static_cast<const GLchar**>(&source_ptr), 0);

@@ -40,6 +40,9 @@ namespace mkay
                       std::string const & i_name );
     
     std::string lookup_path(std::string const &i_name);
+    
+    std::string load_shader_source(std::string const & i_path);
+    std::string load_shader_include(std::string const & i_path);
   };
     
   template<typename X>
@@ -51,7 +54,7 @@ namespace mkay
     auto it = i_ressources.find(i_name);
     if ( it == i_ressources.end() )
     {
-      std::string full_path = lookup_path("textures"+i_name);      
+      std::string full_path = lookup_path(i_name);      
       auto object = new X();
       object->load_from(full_path);
       i_ressources[i_name] = object;

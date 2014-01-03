@@ -8,5 +8,5 @@ in vec3 vtx_tex_coords;
 
 void main(void) 
 { 
-	out_frag_color = texture(tex_cube, vtx_tex_coords);
+  out_frag_color = texture(tex_cube, vtx_tex_coords);
 }
