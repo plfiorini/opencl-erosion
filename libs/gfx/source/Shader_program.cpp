@@ -121,6 +121,11 @@ namespace mkay
     return glGetUniformLocation(m_program_id, i_name);
   }
   
+  GLint Shader_program::get_attribute_location(const char* i_name)
+  {
+    return glGetAttribLocation(m_program_id, i_name);
+  }
+  
   void Shader_program::compile_shader(GLenum i_type, std::string & i_source)
   {
     loginf << "compiling shader: " << get_shader_type_name(i_type) << endl;

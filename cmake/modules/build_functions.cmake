@@ -367,13 +367,25 @@ function(add_cmake_third_party)
 endfunction(add_cmake_third_party)
 
 function(add_glsl_shader)
-  if(NOT TARGET ${PROJECT_NAME})
-    log_debug("adding custom target ${PROJECT_NAME}")
-    add_custom_target(${PROJECT_NAME})
+
+  # add c++ source files  
+  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
+  if(${PROJECT_NAME}_srcs)
+    log_info("add_glsl_shader: adding static library for shader ${PROJECT_NAME}")
+    add_library(${PROJECT_NAME} STATIC
+      ${${PROJECT_NAME}_srcs}
+    )
+  endif()
+
+  set(copy_target ${PROJECT_NAME}_copy)
+
+  if(NOT TARGET ${copy_target})
+    log_info("add_glsl_shader: adding custom target ${copy_target}")
+    add_custom_target(${copy_target})
   endif()
 
   file(GLOB SHADER_HEADER_FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/*.hgl
   )
   file(GLOB SHADER_FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/source/*.glsl
@@ -384,43 +396,51 @@ function(add_glsl_shader)
 
   foreach(file_path ${SHADER_HEADER_FILES})
     get_filename_component(file "${file_path}" NAME)
-    log_debug("adding copy command for ${file} to target ${PROJECT_NAME}")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    log_info("add_glsl_shader: adding copy command for ${file} to target ${copy_target}")
+    add_custom_command(TARGET ${copy_target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${file_path} ${OUTPUT_HEADER}/${file}
     )
   endforeach()
 
   foreach(file_path ${SHADER_FILES})
     get_filename_component(file "${file_path}" NAME)
-    log_debug("adding copy command for ${file} to target ${PROJECT_NAME}")
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    log_info("add_glsl_shader: adding copy command for ${file} to target ${copy_target}")
+    add_custom_command(TARGET ${copy_target} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${file_path} ${OUTPUT_SHADER}/${file}
     )
   endforeach()
 
+  add_dependencies(${PROJECT_NAME} ${copy_target})
+
   private_add_project_headers()
+
 endfunction(add_glsl_shader)
 
 function(add_textures)
-
   set(OUTPUT_TEXTURES ${CMAKE_BINARY_DIR}/output/textures)
   
   add_custom_command(OUTPUT ${OUTPUT_TEXTURES}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/* ${OUTPUT_TEXTURES}
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_TEXTURES}
   )
   log_debug("adding custom target ${PROJECT_NAME}")
   add_custom_target(${PROJECT_NAME} ALL
     DEPENDS ${OUTPUT_TEXTURES}
   )
-
 endfunction(add_textures)
 
 function(use_shader)
   foreach(shader ${ARGN})
-    log_debug("adding dependency to ${shader}")
-    add_dependencies(${PROJECT_NAME} ${shader})
+    get_property(type TARGET ${shader} PROPERTY TYPE) 
+    if(${type} STREQUAL "UTILITY")
+      log_info("use_shader: using only dependency to ${shader}")
+      add_dependencies(${PROJECT_NAME} ${shader})
+    else()
+      log_info("use_shader: adding shader library ${shader}")
+      target_link_libraries(${PROJECT_NAME} ${shader})
+    endif()
   endforeach()
 endfunction(use_shader)
+
 
 #
 # This function just adds the given string to the CXX flag

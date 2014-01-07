@@ -1,0 +1,24 @@
+// light variables
+SHADER_VAR(uniform, vec3, light_position);
+
+SHADER_VAR(uniform, vec4, light_ambient_color);
+SHADER_VAR(uniform, vec4, light_diffuse_color);
+SHADER_VAR(uniform, vec4, light_specular_color);
+
+SHADER_VAR(uniform, float, light_range);
+SHADER_VAR(uniform, float, light_constant_attenuation);
+SHADER_VAR(uniform, float, light_linear_attenuation);
+SHADER_VAR(uniform, float, light_quadratic_attenuation);
+
+// camera variables
+SHADER_VAR(uniform, vec3, camera_position);
+SHADER_VAR(uniform, vec3, camera_view_direction);
+
+// vertex shader variables
+SHADER_VAR(uniform, mat4, model_view_projection);
+SHADER_VAR(uniform, mat4, model_matrix);
+SHADER_VAR(in, vec4, in_position);
+SHADER_VAR(in, vec4, in_normal);
+
+// fragment shader variables
+SHADER_VAR(out, vec4, out_frag_color);

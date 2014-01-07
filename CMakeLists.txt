@@ -35,8 +35,8 @@ include_directories(
 
 # include subdirs
 add_subdirectory(third_party)
+add_subdirectory(shaders)
 add_subdirectory(libs)
 add_subdirectory(modules)
 add_subdirectory(applications)
-add_subdirectory(shaders)
 add_subdirectory(textures)

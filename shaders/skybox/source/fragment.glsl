@@ -1,7 +1,8 @@
 #version 430
 
 // include common shader vars
-#include <skybox/include/vars.h>
+#include <common_shader/include/vars.hgl>
+#include <skybox/include/vars.hgl>
 
 // input vars from vertex stage
 in vec3 vtx_tex_coords;

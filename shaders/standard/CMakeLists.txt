@@ -1,4 +1,4 @@
-project(skybox)
+project(standard)
 
 include(build_functions)
 

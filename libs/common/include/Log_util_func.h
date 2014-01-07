@@ -6,11 +6,8 @@
 
 #include <iostream>
 
-namespace mkay
-{
-  std::ostream &operator<<(std::ostream &o, const glm::vec2 &vec);
-  std::ostream &operator<<(std::ostream &o, const glm::vec3 &vec);
-  std::ostream &operator<<(std::ostream &o, const glm::vec4 &vec);
-} // namespace mkay
+std::ostream &operator<<(std::ostream &o, const glm::vec2 &vec);
+std::ostream &operator<<(std::ostream &o, const glm::vec3 &vec);
+std::ostream &operator<<(std::ostream &o, const glm::vec4 &vec);
 
 #endif // __LOG_UTIL_FUNC_H__

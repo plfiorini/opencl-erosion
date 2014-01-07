@@ -1,4 +1,4 @@
-project(skybox)
+project(common_shader)
 
 include(build_functions)
 

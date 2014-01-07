@@ -10,3 +10,9 @@ use_opengl()
 use_devil()
 use_third_party_cmake(libsdl2)
 use_boost(filesystem)
+
+use_shader(
+  common_shader
+  skybox
+  standard
+)

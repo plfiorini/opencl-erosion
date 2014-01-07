@@ -147,7 +147,7 @@ namespace mkay
   
   void SDL_window_manager::create(
     string const & i_window_name, 
-    dimension32_t const & i_window_size
+    glm::ivec2 const & i_window_size
   )
   {
     if ( m_window )
@@ -167,6 +167,7 @@ namespace mkay
       );
     }
     
+    // list of opengl versions to try
     std::list<std::pair<int,int>> gl_version
     { 
       {4,3}, {4,2},
@@ -191,16 +192,22 @@ namespace mkay
 
         // turn on double buffering 
         SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
         // and 24bit Z buffer.
         SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
         CHECK_SDL_ERROR();
-
+                
+        // SDL_GL_CONTEXT_PROFILE_CORE
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        CHECK_SDL_ERROR();
+        
         // create window
         m_window = SDL_CreateWindow( 
           m_window_name.c_str(),
           SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
-          get<0>(m_window_size), get<1>(m_window_size),
-          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN 
+          m_window_size.x, m_window_size.y,
+          SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE
         );
         if ( !m_window )
         {
@@ -211,15 +218,11 @@ namespace mkay
         }
         CHECK_SDL_ERROR_THROW();
         
-        // SDL_GL_CONTEXT_PROFILE_CORE
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
-        SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
-        CHECK_SDL_ERROR();
-        
         // create opengl context
         m_context = SDL_GL_CreateContext(m_window);
         CHECK_SDL_ERROR_THROW();
-        
+
+        // initialize glew for extension handling
         GLenum err = glewInit();
         if (err != GLEW_OK)
         {
@@ -229,6 +232,7 @@ namespace mkay
           );
         }
         
+        // provide dummy parameters for glutInit
         int argc = 1;
         char *name = "asdfg";
         glutInit(&argc, &name);
@@ -253,10 +257,22 @@ namespace mkay
     SDL_GL_SetSwapInterval(1);
     CHECK_SDL_ERROR();
     
+    // antialiasing
+    glEnable(GL_MULTISAMPLE);
+    
     // clear screen
-    glClearColor(0,0,0,1);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     this->swap_buffers();
+    
+    // z-buffer
+    glClearDepth(1.0f);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    
+    // backface culling
+    glEnable(GL_CULL_FACE); 
+    glCullFace(GL_BACK);
     
     int major, minor;
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
@@ -300,4 +316,12 @@ namespace mkay
     logwarn << "FIXME: SDL_Quit not working" << endl;
     m_window = nullptr;
   }
+  
+  void SDL_window_manager::on_resize(glm::ivec2 const & i_new_window_size)
+  {
+    m_window_size = i_new_window_size;
+    glViewport( 0, 0
+              , m_window_size.x, m_window_size.y );
+  }
+
 }

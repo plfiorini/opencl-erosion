@@ -5,14 +5,20 @@
 #include <memory>
 
 #include <module/include/Module.h>
+
 #include <gfx/include/SDL_window_manager.h>
+#include <gfx/include/SDL_event_manager.h>
 #include <gfx/include/Camera.h>
+#include <gfx/include/Point_light.h>
 #include <gfx/include/Skybox.h>
-#include <input/include/SDL_input_manager.h>
+#include <gfx/include/Box.h>
+
 #include <cl/include/CL_manager.h>
 
 namespace mkay
 {
+  class Shader_program;
+  
   class Module_erosion 
     : public Module
   {
@@ -21,7 +27,7 @@ namespace mkay
     virtual void configure(boost::program_options::variables_map const & i_variables);
     virtual void step();
     virtual void shutdown();
-    virtual bool requests_exit() { return m_input_manager.received_quit_event(); }
+    virtual bool requests_exit() { return m_event_manager.received_quit_event(); }
     
     Module_erosion();
     virtual ~Module_erosion();
@@ -34,12 +40,19 @@ namespace mkay
     const std::string c_default_search_path = "..";
     
     SDL_window_manager m_window_manager;
-    SDL_input_manager m_input_manager;
+    SDL_event_manager m_event_manager;
     CL_manager m_cl_manager;
+    
+    Shader_program * m_shader;
     
     Camera m_camera;
     
+    Point_light m_light;
+    
     Skybox m_skybox;
+    Box m_geo_object;
+    
+    void render_scene();
   };
   
   typedef std::shared_ptr<Module> Module_ptr_t;

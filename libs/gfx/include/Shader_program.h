@@ -13,7 +13,8 @@
 
 /// definition macro for shader variables
 #define SHADER_VAR(io, type, name) \
-  const char *name = STRINGIFY(name)
+  extern const char *name;
+  //= STRINGIFY(name)
 
 namespace mkay
 { 
@@ -29,6 +30,7 @@ namespace mkay
     void disable() { glUseProgram(0); }
       
     GLint get_uniform_location(const char *i_name);
+    GLint get_attribute_location(const char *i_name);
     
   private:
     GLuint m_program_id = 0;

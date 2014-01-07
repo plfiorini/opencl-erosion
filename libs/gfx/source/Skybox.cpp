@@ -2,7 +2,8 @@
 #include <gfx/include/Camera.h>
 #include <gfx/include/Ressource_manager.h>
 
-#include <skybox/include/vars.h>
+#include <common_shader/include/vars.hgl>
+#include <skybox/include/vars.hgl>
 
 #include <GL/glut.h>
 
@@ -30,11 +31,12 @@ namespace mkay
     m_texture->set(m_shader, GL_TEXTURE0, tex_cube);
     
     glDisable(GL_DEPTH_TEST);
-    glDisable(GL_BLEND);
+    //glDisable(GL_BLEND);
     
-    glutSolidCube(1.0f);
+    glutSolidCube(-1.0f);
     
     m_texture->unset();
-
+    m_shader->disable();
   }
 } // namespace mkay
+

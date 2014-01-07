@@ -1,1 +1,3 @@
+add_subdirectory(common_shader)
 add_subdirectory(skybox)
+add_subdirectory(standard)
