@@ -5,11 +5,13 @@
 #include <common/include/Tools.h>
 #include <common/include/glm_definitions.h>
 
+#include <gfx/include/Abstract_material.h>
+
 #include <GL/glew.h>
 
 namespace mkay
 {
-  class Shader_program;
+  class Camera;
   
   enum class VBO_type
     : GLuint
@@ -32,9 +34,9 @@ namespace mkay
     Abstract_geometric_object() = default;
     virtual ~Abstract_geometric_object() = 0;
     
-    void initialize_data_structures(Shader_program *i_shader);
+    void buffer_data(Abstract_material_ptr i_material);
     
-    void draw(Shader_program *i_shader);
+    void draw(Camera const &i_camera);
     
     void calculate_model_matrix();
     glm::mat4 const & get_model_matrix() { return m_model_matrix; }
@@ -47,6 +49,10 @@ namespace mkay
     glm::vec3 const & get_scale() { return m_scale; }
     void reset_scale() { m_scale = glm::vec3{1.0f}; }
     
+    void set_material(Abstract_material_ptr i_material);
+    Abstract_material_ptr get_material() { return m_material; }
+    Shader_program * get_shader() { return m_material->get_shader(); }
+    
   protected:   
     GLuint m_vbo_id[to_integral(VBO_type::Count)] = {0u, 0u, 0u};
     GLsizei m_triangle_count = 0;
@@ -55,8 +61,9 @@ namespace mkay
     glm::vec3 m_position = glm::vec3{0.0f};
     glm::vec3 m_scale = glm::vec3{1.0f};
     
-    virtual void internal_initialize_data_structures(Shader_program *i_shader) = 0;
+    Abstract_material_ptr m_material;
     
+    virtual void internal_buffer_data(Abstract_material_ptr i_material) = 0;    
   };
 } // namespace mkay
 

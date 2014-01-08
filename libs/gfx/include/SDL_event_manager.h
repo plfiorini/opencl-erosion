@@ -55,6 +55,8 @@ namespace mkay
     void handle_key_event(SDL_KeyboardEvent const & i_key_event);
     void handle_window_event(SDL_WindowEvent const & i_window_event);
     void handle_mouse_motion();
+    
+    glm::ivec2 center_mouse();
   };
 } // namespace mkay
 

@@ -11,7 +11,7 @@
 #include <gfx/include/Camera.h>
 #include <gfx/include/Point_light.h>
 #include <gfx/include/Skybox.h>
-#include <gfx/include/Box.h>
+#include <gfx/include/Cube.h>
 
 #include <cl/include/CL_manager.h>
 
@@ -43,16 +43,17 @@ namespace mkay
     SDL_event_manager m_event_manager;
     CL_manager m_cl_manager;
     
-    Shader_program * m_shader;
-    
     Camera m_camera;
     
     Point_light m_light;
     
     Skybox m_skybox;
-    Box m_geo_object;
     
-    void render_scene();
+    Cube m_geo_object;
+    Cube m_light_object;
+    
+    void update_scene();
+    void render_scene();    
   };
   
   typedef std::shared_ptr<Module> Module_ptr_t;

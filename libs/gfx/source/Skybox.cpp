@@ -3,7 +3,7 @@
 #include <gfx/include/Ressource_manager.h>
 
 #include <common_shader/include/vars.hgl>
-#include <skybox/include/vars.hgl>
+#include <skybox_shader/include/vars.hgl>
 
 #include <GL/glut.h>
 
@@ -13,7 +13,7 @@ namespace mkay
 {
   void Skybox::init()
   {
-    m_shader = RESMAN.get<Shader_program>("skybox");
+    m_shader = RESMAN.get<Shader_program>("skybox_shader");
     m_texture = RESMAN.get<Texture_cube_map>("cubemap_brightday1");
   }
   

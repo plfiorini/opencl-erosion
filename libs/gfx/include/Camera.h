@@ -33,17 +33,17 @@ namespace mkay
       m_aspect_ratio = ASPECT_RATIO(i_width, i_height);
     }
     void set_aspect_ratio(double i_aspect_ratio) { m_aspect_ratio = i_aspect_ratio; }
-    double get_aspect_ratio() { return m_aspect_ratio; }
+    double get_aspect_ratio() const { return m_aspect_ratio; }
     
-    glm::mat4 get_projection_view_matrix() { return m_projection*m_view; }
+    glm::mat4 get_projection_view_matrix() const { return m_projection*m_view; }
     
     void move(glm::vec3 const & i_translation);
     void set_position(glm::vec3 const &i_position) { m_virtual_position = i_position; m_position = -i_position; }
-    glm::vec3 const & get_position() { return m_virtual_position; }
+    glm::vec3 const & get_position() const { return m_virtual_position; }
     
     void rotate(glm::vec2 const & i_rotation);
     void set_rotation(glm::vec2 const & i_rotation) { m_rotation = m_virtual_rotation = glm::vec3{}; rotate(i_rotation, true); }
-    glm::vec3 const & get_rotation() { return m_virtual_rotation; }
+    glm::vec3 const & get_rotation() const { return m_virtual_rotation; }
     
     void print(std::ostream & outstr) const;
     

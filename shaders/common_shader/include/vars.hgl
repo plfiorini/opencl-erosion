@@ -1,3 +1,7 @@
+// matrizes
+SHADER_VAR(uniform, mat4, model_view_projection);
+SHADER_VAR(uniform, mat4, model_matrix);
+
 // light variables
 SHADER_VAR(uniform, vec3, light_position);
 
@@ -15,8 +19,6 @@ SHADER_VAR(uniform, vec3, camera_position);
 SHADER_VAR(uniform, vec3, camera_view_direction);
 
 // vertex shader variables
-SHADER_VAR(uniform, mat4, model_view_projection);
-SHADER_VAR(uniform, mat4, model_matrix);
 SHADER_VAR(in, vec4, in_position);
 SHADER_VAR(in, vec4, in_normal);
 

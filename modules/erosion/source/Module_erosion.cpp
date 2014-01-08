@@ -3,11 +3,16 @@
 
 #include <gfx/include/Ressource_manager.h>
 #include <gfx/include/Shader_program.h>
+#include <gfx/include/Material_factory.h>
+#include <gfx/include/Colored_material.h>
 
 #include <CL/cl.hpp>
 
 #include <common_shader/include/vars.hgl>
-#include <standard/include/vars.hgl>
+#include <color_shader/include/vars.hgl>
+
+#define _USE_MATH_DEFINES
+#include <cmath>
 
 using namespace std;
 namespace po = boost::program_options;
@@ -18,11 +23,11 @@ namespace mkay
     : m_window_manager{}
     , m_event_manager{}
     , m_cl_manager{}
-    , m_shader(nullptr)
     , m_camera()
     , m_light()
     , m_skybox()
     , m_geo_object(100.0f)
+    , m_light_object(10.0f)
   {
   }
   
@@ -49,8 +54,8 @@ namespace mkay
     m_window_manager = SDL_window_manager{};
     m_window_manager.create("Erosion", glm::ivec2{c_default_width, c_default_height});
     
-    //m_cl_manager = CL_manager{};
-    //m_cl_manager.init(CL_DEVICE_TYPE_ALL, "AMD Accelerated Parallel Processing");
+    m_cl_manager = CL_manager{};
+    m_cl_manager.init(CL_DEVICE_TYPE_ALL, "AMD Accelerated Parallel Processing");
     
     m_event_manager = SDL_event_manager{};
     m_event_manager.configure(&m_window_manager, &m_camera);
@@ -64,22 +69,42 @@ namespace mkay
     m_skybox.init();
     
     // initialize own rendering stuff
-    
-    m_shader = RESMAN.get<Shader_program>("standard");
-    
-    m_geo_object.initialize_data_structures(m_shader);
+    Colored_material_ptr red_material(
+      dynamic_cast<Colored_material *>(
+        Material_factory::create(Material_type::Colored)
+      )
+    );
+    red_material->set_material_color(glm::vec4{1.0f, 0.0f, 0.0f, 1.0f});
+    m_geo_object.buffer_data(red_material);
     m_geo_object.set_position(glm::vec3{0.0f});
+    m_geo_object.calculate_model_matrix();
+    
+    m_light.set_position(glm::vec3{0.0f});
+    m_light.set_ambient_color(glm::vec4{0.2f, 0.2f, 0.2f, 1.0f});
+    m_light.set_diffuse_color(glm::vec4{1.0f});
+    m_light.set_specular_color(glm::vec4{0.1f, 0.1f, 0.1f, 1.0f});
+    m_light.set_range(5000.0f);
+    m_light.set_linear_attenuation(0.2f);
+    m_light.set_quadratic_attenuation(0.01f);
+    
+    Colored_material_ptr white_material(
+      dynamic_cast<Colored_material *>(
+        Material_factory::create(Material_type::Colored)
+      )
+    );
+    white_material->ignore_lighting(true);
+    white_material->set_material_color(glm::vec4{1.0f});
+    m_light_object.buffer_data(white_material);
+    m_light_object.set_position(m_light.get_position());
+    m_light_object.calculate_model_matrix();
 
     loginf << "finished configuration" << endl;
   }
   
   void Module_erosion::step()
   {
-    m_event_manager.handle_event_loop();
-
+    update_scene();    
     render_scene();
-    
-    //loginf << "step" << endl;
     m_window_manager.swap_buffers();
   }
   
@@ -96,27 +121,47 @@ namespace mkay
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     
     // draw skybox
-    //m_skybox.render(m_camera);
+    m_skybox.render(m_camera);
     
-    // draw own stuff
-    m_geo_object.calculate_model_matrix();
-    
-    m_shader->use();
-    
+    // draw own stuff    
     m_camera.setup_scene();
-    
-    m_light.let_there_be_light(m_shader);
     
     glEnable(GL_DEPTH_TEST);
     
-    glm::mat4 const & model = m_geo_object.get_model_matrix();
-    glm::mat4 mvp = m_camera.get_projection_view_matrix() * model;
-    glUniformMatrix4fv(m_shader->get_uniform_location(model_view_projection), 1, GL_FALSE, glm::value_ptr(mvp) );
-    glUniformMatrix4fv(m_shader->get_uniform_location(model_matrix), 1, GL_FALSE, glm::value_ptr(model) );
-
-    m_geo_object.draw(m_shader);
+    {
+      m_geo_object.get_shader()->use();
+      m_light.let_there_be_light(m_geo_object.get_shader());
+      m_geo_object.draw(m_camera);
+    }
+    {
+      m_light_object.get_shader()->use();
+      m_light.let_there_be_light(m_light_object.get_shader());
+      m_light_object.draw(m_camera);
+    }
+  }
+  
+  void Module_erosion::update_scene()
+  {
+    m_event_manager.handle_event_loop();
     
-    m_shader->disable();
+    static float x=0.0f;
+    x+=0.05f;
+    if( x>2.0f*M_PI ) x=0.0f;    
+    
+    glm::vec3 pos = m_light.get_position();
+    
+    const float scale = 500.0f;
+    pos.x = scale*sin(x);
+    pos.y = scale*sin(x)*cos(x);
+    pos.z = scale*cos(x);
+    
+//     loginf << "lightpos = " << pos << endl;
+    
+    m_light.set_position(pos);
+    m_light_object.set_position(pos);
+    m_light_object.calculate_model_matrix();
+    
+//     loginf << "camerapos = " << m_camera.get_position() << endl;
   }
 
 }

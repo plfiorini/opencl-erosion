@@ -13,6 +13,6 @@ use_boost(filesystem)
 
 use_shader(
   common_shader
-  skybox
-  standard
+  skybox_shader
+  color_shader
 )

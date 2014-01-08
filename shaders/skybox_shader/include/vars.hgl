@@ -1,0 +1,2 @@
+// fragment shader variables
+SHADER_VAR(uniform, samplerCube, tex_cube);

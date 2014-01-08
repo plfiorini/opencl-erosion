@@ -53,6 +53,7 @@ namespace mkay
         {
           m_mouse_rightclick = true;
           SDL_ShowCursor(0);
+          center_mouse();
         }
         break;
       case SDL_MOUSEBUTTONUP:
@@ -65,7 +66,7 @@ namespace mkay
         }
         break;
       case SDL_MOUSEMOTION:
-        loginf << "mouse motion" << endl;
+        //loginf << "mouse motion" << endl;
         if ( m_mouse_rightclick )
         {
           handle_mouse_motion();
@@ -125,10 +126,10 @@ namespace mkay
       glm::vec3 move_vector{
         m_movement_speed*m_movement[static_cast<size_t>(Movement::Left)] 
           - m_movement_speed*m_movement[static_cast<size_t>(Movement::Right)],
-        m_movement_speed*m_movement[static_cast<size_t>(Movement::Forward)] 
-          - m_movement_speed*m_movement[static_cast<size_t>(Movement::Backward)],
         m_movement_speed*m_movement[static_cast<size_t>(Movement::Up)] 
-          - m_movement_speed*m_movement[static_cast<size_t>(Movement::Down)]
+          - m_movement_speed*m_movement[static_cast<size_t>(Movement::Down)],
+        m_movement_speed*m_movement[static_cast<size_t>(Movement::Forward)] 
+          - m_movement_speed*m_movement[static_cast<size_t>(Movement::Backward)]
       };
       
       logdeb << "move vector: " << move_vector << endl;
@@ -156,12 +157,18 @@ namespace mkay
     
     glm::vec2 delta = glm::vec2(current_position) - glm::vec2(m_mouse_old_position);    
     m_current_camera->rotate(delta.yx);
-              
+
+    m_mouse_old_position = center_mouse();
+  }
+  
+  glm::ivec2 SDL_event_manager::center_mouse()
+  {
+                  
     glm::ivec2 center = m_window_manager->get_center_position();
     SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE); 
     SDL_WarpMouseInWindow(m_window_manager->get_window(), center.x, center.y);
     SDL_EventState(SDL_MOUSEMOTION, SDL_ENABLE);
-    
-    m_mouse_old_position = center;
+    return center;
   }
+
 } // namespace mkay
