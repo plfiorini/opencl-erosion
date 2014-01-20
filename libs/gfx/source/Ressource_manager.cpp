@@ -33,6 +33,15 @@ namespace mkay
     iluInit();
     ilutInit();
     ilutRenderer(ILUT_OPENGL);
+    
+    // init ttf lib
+    if (TTF_Init() == -1)
+    {
+      BOOST_THROW_EXCEPTION(
+        Ressource_exception{}
+          << errinfo_str{std::string{"could not initialize sdl ttf library: "} + TTF_GetError()}
+      );
+    }
   }
 
   template<>
@@ -81,6 +90,25 @@ namespace mkay
       }
       object->build(i_name);
       m_shaders[i_name] = object;
+      return object;
+    }
+    else
+    {
+      return it->second;
+    }
+  }
+  
+  template<>
+  TTF_Font * Ressource_manager::get<TTF_Font>(
+      std::string const & i_name
+  )
+  {
+    auto it = m_fonts.find(i_name);
+    if ( it == m_fonts.end() )
+    {
+      std::string full_path = lookup_path(i_name);      
+      auto * object = TTF_OpenFont("images\\segoepr.ttf",52);
+      m_fonts[i_name] = object;
       return object;
     }
     else

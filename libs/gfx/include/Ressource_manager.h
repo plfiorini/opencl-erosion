@@ -10,9 +10,11 @@
 #include <gfx/include/Texture.h>
 #include <gfx/include/Texture_cube_map.h>
 
+#include <SDL2/SDL_ttf.h>
+
 #define RESMAN \
   Ressource_manager::instance()
-
+  
 namespace mkay
 {
   class Ressource_manager
@@ -34,6 +36,7 @@ namespace mkay
     std::map<std::string, Texture *> m_textures;
     std::map<std::string, Texture_cube_map *> m_cube_maps;
     std::map<std::string, Shader_program *> m_shaders;
+    std::map<std::string, TTF_Font*> m_fonts;
     
     template<typename X>
     X * get_internal( std::map<std::string, X *> & i_ressources,
@@ -55,7 +58,7 @@ namespace mkay
     if ( it == i_ressources.end() )
     {
       std::string full_path = lookup_path(i_name);      
-      auto object = new X();
+      auto * object = new X();
       object->load_from(full_path);
       i_ressources[i_name] = object;
       return object;

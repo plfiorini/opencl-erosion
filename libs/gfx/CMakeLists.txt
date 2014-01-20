@@ -8,7 +8,7 @@ add_standard_lib(
 
 use_opengl()
 use_devil()
-use_third_party_cmake(libsdl2)
+use_third_party(libsdl2 libsdl2_ttf)
 use_boost(filesystem)
 
 use_shader(

@@ -292,6 +292,10 @@ function(add_traditional_third_party)
   elseif(NOT DEFINED TRD_VERSION)
     log_fatal_error("VERSION not set!")
   endif()
+  
+  if(NOT DEFINED TRD_INSTALL_TARGETS)
+    set(TRD_INSTALL_TARGETS "install")
+  endif()
 
   log_info("Adding traditional third party library: ${PROJECT_NAME} - ${TRD_NAME}")
 
@@ -317,7 +321,8 @@ function(add_traditional_third_party)
       INSTALL_DIR ${TRD_STAGE_DIR}
       INSTALL_COMMAND make ${TRD_INSTALL_TARGETS}
     )
-  endif()  
+  endif()
+
 endfunction(add_traditional_third_party)
 
 #
@@ -441,6 +446,26 @@ function(use_shader)
   endforeach()
 endfunction(use_shader)
 
+function(add_ttf_fonts)
+  set(OUTPUT_FONTS ${CMAKE_BINARY_DIR}/output/fonts)
+  
+  file(GLOB FILES 
+    RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    *.ttf
+  )
+  
+  foreach(file ${FILES})
+    log_info("adding ${file}")
+    add_custom_command(OUTPUT ${OUTPUT_FONTS}/${file}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/${file} ${OUTPUT_FONTS}/${file}
+    )
+  endforeach()
+  
+  log_debug("adding custom target ${PROJECT_NAME}")
+  add_custom_target(${PROJECT_NAME} ALL
+    DEPENDS ${FILES}
+  )    
+endfunction(add_ttf_fonts)
 
 #
 # This function just adds the given string to the CXX flag

@@ -6,6 +6,8 @@
 
 #include <module/include/Module.h>
 
+#include <common/include/Time_measurement.h>
+
 #include <gfx/include/SDL_window_manager.h>
 #include <gfx/include/SDL_event_manager.h>
 #include <gfx/include/Camera.h>
@@ -51,6 +53,8 @@ namespace mkay
     
     Cube m_geo_object;
     Cube m_light_object;
+    
+    Time_measurement m_laptime;
     
     void update_scene();
     void render_scene();    

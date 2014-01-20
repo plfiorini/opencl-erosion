@@ -103,6 +103,7 @@ namespace mkay
   
   void Module_erosion::step()
   {
+    m_laptime.take_time();
     update_scene();    
     render_scene();
     m_window_manager.swap_buffers();
@@ -142,6 +143,8 @@ namespace mkay
   
   void Module_erosion::update_scene()
   {
+    //loginf << "laptime: " << m_laptime.get_microseconds().count() << " µs" << endl;
+    
     m_event_manager.handle_event_loop();
     
     static float x=0.0f;

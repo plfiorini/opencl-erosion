@@ -6,6 +6,6 @@ add_standard_lib(
   common
 )
 
-use_third_party_cmake(glm)
+use_third_party(glm)
 use_opengl()
 use_opencl()
