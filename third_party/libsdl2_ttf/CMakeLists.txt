@@ -12,6 +12,6 @@ else()
   add_traditional_third_party(
     NAME "SDL2_ttf-2.0.12.tar.gz"
     VERSION "2.0.12"
-    LIBS "libSDL2.so"
+    LIBS "libSDL2_ttf.so"
   )
 endif()

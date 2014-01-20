@@ -281,7 +281,7 @@ endfunction(add_standard_executable)
 # Additional parameters ${ARGN} specify libraries, which get linked.
 #
 function(add_traditional_third_party)
-  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION" "TARGETS;INSTALL_TARGETS;PATCHES" ${ARGN})
+  cmake_parse_arguments(TRD "" "PKG;TYPE;NAME;VERSION" "TARGETS;LIBS;INSTALL_TARGETS;PATCHES" ${ARGN})
   # if specified TRD_PKG holds the tools installation package name
   # unrecognized parameters can be found in TRD_UNPARSED_ARGUMENTS
 
@@ -323,6 +323,13 @@ function(add_traditional_third_party)
     )
   endif()
 
+  set(libraries "")
+  if(TRD_LIBS)
+    foreach(lib ${TRD_LIBS})
+      list(APPEND libraries ${TRD_STAGE_DIR}/lib/${lib})
+    endforeach()
+  endif()
+  set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
 endfunction(add_traditional_third_party)
 
 #

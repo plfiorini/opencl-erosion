@@ -118,12 +118,12 @@ function(use_system_library name)
 endfunction(use_system_library)
 
 function(use_third_party name)
-  log_debug("use_third_party_cmake: Searching libraries of ${name}")
+  log_debug("use_third_party: Searching libraries of ${name}")
   foreach(lib ${${name}_LIBS})
     if(NOT EXISTS ${lib})
       log_warning("${lib} library not found (yet)")
     else()
-      log_info("use_third_party_cmake: Using library ${lib}")
+      log_info("use_third_party: Using library ${lib}")
     endif()
 
     target_link_libraries(${PROJECT_NAME}
