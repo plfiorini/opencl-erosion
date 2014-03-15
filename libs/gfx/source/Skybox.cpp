@@ -14,7 +14,7 @@ namespace mkay
   void Skybox::init()
   {
     m_shader = RESMAN.get<Shader_program>("skybox_shader");
-    m_texture = RESMAN.get<Texture_cube_map>("cubemap_brightday1");
+    m_texture = RESMAN.get<Texture_cube_map>("cubemap_stormy_day");
   }
   
   void Skybox::render(Camera & i_camera)

@@ -126,8 +126,8 @@ function(private_add_standard_lib library_type)
   # set build output properties (only for dynamic libs)
   set_target_properties( ${PROJECT_NAME}
     PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/lib"
+    ARCHIVE_OUTPUT_DIRECTORY "${STATICLIB_OUTPUT_DIRECTORY}"
+    LIBRARY_OUTPUT_DIRECTORY "${SHAREDLIB_OUTPUT_DIRECTORY}"
     OUTPUT_NAME ${PROJECT_NAMESPACE}${PROJECT_NAME}
   )
 
@@ -199,7 +199,7 @@ function(private_add_standard_module library_type)
   # set build output properties (only for dynamic modules)
   set_target_properties( ${PROJECT_NAME}
     PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/modules"
+    LIBRARY_OUTPUT_DIRECTORY "${MODULE_OUTPUT_DIRECTORY}"
     OUTPUT_NAME ${PROJECT_NAMESPACE}module_${PROJECT_NAME}
   )
 endfunction(private_add_standard_module)
@@ -431,13 +431,15 @@ endfunction(add_glsl_shader)
 function(add_textures)
   set(OUTPUT_TEXTURES ${CMAKE_BINARY_DIR}/output/textures)
   
-  add_custom_command(OUTPUT ${OUTPUT_TEXTURES}
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR} ${OUTPUT_TEXTURES}
-  )
-  log_debug("adding custom target ${PROJECT_NAME}")
-  add_custom_target(${PROJECT_NAME} ALL
-    DEPENDS ${OUTPUT_TEXTURES}
-  )
+  foreach(tex ${ARGN})
+    add_custom_command(OUTPUT ${OUTPUT_TEXTURES}/${tex}
+      COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/${tex} ${OUTPUT_TEXTURES}/${tex}
+    )
+    log_info("adding custom target ${PROJECT_NAME}_${tex}")
+    add_custom_target(${PROJECT_NAME}_${tex} ALL
+      DEPENDS ${OUTPUT_TEXTURES}/${tex}
+    )
+  endforeach()
 endfunction(add_textures)
 
 function(use_shader)
