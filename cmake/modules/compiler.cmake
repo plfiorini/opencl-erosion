@@ -20,7 +20,7 @@ if(CMAKE_CXX_COMPILER)
   add_cxx_flags("-Wall")
   if ( "${GCC_VERSION}" STREQUAL "4.6" )
     force_cxx_std("c++0x")
-  elseif ( "${GCC_VERSION}" STREQUAL "4.7" )
+  elseif ( ${GCC_MAJOR} EQUAL 4 AND NOT ( ${GCC_MINOR} LESS 7 ) )
     force_cxx_std("c++11")
   endif()
 

@@ -96,7 +96,7 @@ function(use_system_library name)
 
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     find_library(${name}_LIB ${name}
-      PATHS /usr/lib /usr/lib64
+      PATHS /usr/lib /usr/lib64 /usr/lib/x86_64-linux-gnu
       DOC "Fully qualified library path of ${name}"
     )
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
