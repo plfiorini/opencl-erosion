@@ -64,18 +64,29 @@ function(use_opencl)
 endfunction(use_opencl)
 
 function(use_boost)
-  foreach(lib ${ARGN})
-    log_debug("use_boost: adding boost library ${lib}")
-    set(libname "boost_${lib}")
-    use_system_library(${libname})
-  endforeach()
+  if( "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux" ) 
+    foreach(lib ${ARGN})
+      log_debug("use_boost: adding boost library ${lib}")
+      set(libname "boost_${lib}")
+      use_system_library(${libname})
+    endforeach()
+  elseif( "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" )
+    set(BOOST_INCLUDE_PATH "W:\\development\\boost_1_51_0" CACHE PATH  "Set the include path to the boost libraries")
+    include_directories(${BOOST_INCLUDE_PATH})
+    add_include_dependency(${BOOST_INCLUDE_PATH})
+    set(BOOST_LIB_PATH "W:\\development\\boost_1_51_0\\stage\\lib"  CACHE PATH  "Set the library path to the boost libraries")
+    use_user_library( 
+      SEARCH_PATH "${BOOST_LIB_PATH}"
+      PREFIX "libboost_"
+      POSTFIX "-vc90-mt-1_51"
+      ${ARGN}
+    )
+  endif()
 endfunction(use_boost)
 
 function(use_opengl)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    use_system_library(GL)
-    use_system_library(GLEW)
-    use_system_library(glut)
+    use_system_library(GL GLEW glut)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
     use_system_library(OpenGL32)  
   endif()
@@ -83,38 +94,45 @@ endfunction(use_opengl)
 
 function(use_devil)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    use_system_library(IL)
-    use_system_library(ILU)
-    use_system_library(ILUT)
+    use_system_library(IL ILU ILUT)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    use_system_library(asdfg)
+    set(DEVIL_INCLUDE_PATH "W:\\development\\DevIL\\include" CACHE PATH "Set the include path to the DevIL libraries")
+    include_directories(${DEVIL_INCLUDE_PATH})
+    add_include_dependency(${DEVIL_INCLUDE_PATH})
+    set(DEVIL_LIB_PATH "W:\\development\\DevIL\\lib" CACHE PATH  "Set the library path to the DevIL libraries")
+    use_user_library(
+      SEARCH_PATH ${DEVIL_LIB_PATH}
+      DevIL ILU ILUT
+    )
   endif()
 endfunction(use_devil)
 
-function(use_system_library name)
-  log_debug("use_system_library: Searching for ${name}")
+function(use_system_library)
+  foreach(name ${ARGN})
+    log_debug("use_system_library: Searching for ${name}")
 
-  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
-    find_library(${name}_LIB ${name}
-      PATHS /usr/lib /usr/lib64 /usr/lib/x86_64-linux-gnu
-      DOC "Fully qualified library path of ${name}"
+    if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+      find_library(${name}_LIB ${name}
+        PATHS /usr/lib /usr/lib64 /usr/lib/x86_64-linux-gnu
+        DOC "Fully qualified library path of ${name}"
+      )
+    elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+      find_library(${name}_LIB ${name}
+        PATHS "C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib"
+        DOC "Fully qualified library path of ${name}"
+      )  
+    endif()
+
+    if(NOT EXISTS ${${name}_LIB})
+      log_fatal_error("use_system_library: ${name} library not found")
+    else()
+      log_info("use_system_library: Using library ${${name}_LIB}")
+    endif()
+
+    target_link_libraries(${PROJECT_NAME}
+      ${${name}_LIB}
     )
-  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    find_library(${name}_LIB ${name}
-      PATHS "C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib"
-      DOC "Fully qualified library path of ${name}"
-    )  
-  endif()
-
-  if(NOT EXISTS ${${name}_LIB})
-    log_fatal_error("use_system_library: ${name} library not found")
-  else()
-    log_info("use_system_library: Using library ${${name}_LIB}")
-  endif()
-
-  target_link_libraries(${PROJECT_NAME}
-    ${${name}_LIB}
-  )
+  endforeach()
 endfunction(use_system_library)
 
 function(use_third_party name)
@@ -133,3 +151,32 @@ function(use_third_party name)
 
   add_dependencies(${PROJECT_NAME} ${name})
 endfunction(use_third_party)
+
+function(use_user_library)
+  cmake_parse_arguments( USER_LIB "" "SEARCH_PATH;PREFIX;POSTFIX" "" ${ARGN} )
+  
+  foreach(name ${USER_LIB_UNPARSED_ARGUMENTS})
+    if( USER_LIB_PREFIX )
+      set(name "${USER_LIB_PREFIX}${name}")
+    endif()
+    if( USER_LIB_POSTFIX )
+      set(name "${name}${USER_LIB_POSTFIX}")
+    endif()
+    log_debug("use_user_library: Searching for ${name}")
+
+    find_library(${name}_USER_LIB ${name}
+      PATHS "${USER_LIB_SEARCH_PATH}"
+      DOC "Fully qualified library path of ${name}"
+    )  
+
+    if(NOT EXISTS ${${name}_USER_LIB})
+      log_fatal_error("use_user_library: ${name} library not found")
+    else()
+      log_info("use_user_library: Using library ${${name}_USER_LIB}")
+    endif()
+
+    target_link_libraries(${PROJECT_NAME}
+      ${${name}_USER_LIB}
+    )
+  endforeach()
+endfunction(use_user_library)

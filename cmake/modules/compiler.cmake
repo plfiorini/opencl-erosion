@@ -4,12 +4,12 @@ include(build_functions)
 #
 # figure out gcc version
 #
-if(CMAKE_CXX_COMPILER)
+if( CMAKE_CXX_COMPILER AND CMAKE_COMPILER_IS_GNUCXX )
   execute_process(COMMAND ${CMAKE_CXX_COMPILER} -dumpversion 
     OUTPUT_VARIABLE gcc_version_raw 
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-
+  
   # extract first two numbers, separated by a dot (e.g. 4.3)
   string(REGEX REPLACE "([0-9+])\\.([0-9]+).*" "\\1" GCC_MAJOR "${gcc_version_raw}")
   string(REGEX REPLACE "([0-9+])\\.([0-9]+).*" "\\2" GCC_MINOR "${gcc_version_raw}")
@@ -32,12 +32,21 @@ if(CMAKE_CXX_COMPILER)
   set(CXX_COMPILER_VERSION "${cxx_compiler_version}" CACHE STRING "Full version string of the used c++ compiler" FORCE)
 
   log_info("compiler.cmake: Using cxx-compiler version ${CXX_COMPILER_VERSION}")
-
+elseif ( MSVC )
+	log_info("compiler.cmake: Using Microsoft C++ Compiler!")
+  
+  if ( MSVC12 )
+    set(CXX_COMPILER_VERSION "18" CACHE STRING "Full version string of the used c++ compiler" FORCE)
+    set(C_COMPILER_VERSION "18" CACHE STRING "Full version string of the used c compiler" FORCE)
+  endif()  
+  
+  log_info("compiler.cmake: Compiler version: ${CXX_COMPILER_VERSION}" )
+  
 else()
   log_warning("compiler.cmake: CMAKE_CXX_COMPILER not defined!")
 endif()
 
-if(CMAKE_C_COMPILER)
+if( CMAKE_C_COMPILER AND CMAKE_COMPILER_IS_GNUCC )
   execute_process(COMMAND ${CMAKE_C_COMPILER} "--version"
     OUTPUT_VARIABLE c_compiler_version
     OUTPUT_STRIP_TRAILING_WHITESPACE
@@ -45,7 +54,6 @@ if(CMAKE_C_COMPILER)
   string(REGEX REPLACE "\\\n.*" "" c_compiler_version "${c_compiler_version}")
   set(C_COMPILER_VERSION "${c_compiler_version}" CACHE STRING "Full version string of the used c compiler" FORCE)
   log_info("compiler.cmake: Using c-compiler version ${C_COMPILER_VERSION}")
-
-else()
+elseif( NOT MSVC )
   log_warning("compiler.cmake: CMAKE_C_COMPILER not defined!")
 endif()
