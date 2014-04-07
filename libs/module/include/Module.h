@@ -3,9 +3,11 @@
 #define __MODULE_H__
 
 #include <boost/program_options.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace mkay
 {
+  /// \brief Base class for all Modules
   class Module
   {
   public:
@@ -24,6 +26,9 @@ namespace mkay
     Module(const Module &) = delete;
     Module & operator=(const Module &) = delete;
   };
+  
+  /// \brief smart pointer typedef for Module
+  typedef boost::shared_ptr<Module> Module_ptr_t;  
 } // namespace mkay
 
 #endif // __MODULE_H__

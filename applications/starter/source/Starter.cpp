@@ -7,6 +7,7 @@
 #include <common/include/Mkay_exception.h>
 #include <common/include/Logger.h>
 #include <module/include/Configuration_exception.h>
+#include <module/include/Object_factory.h>
 #include <erosion/include/Module_erosion.h>
 
 #include <generated/include/version_gen_fwd.hpp>
@@ -68,6 +69,7 @@ void signal_handler(int signum)
 }
 
 /// Module Creation Factory
+/*
 Module_ptr_t create_module(std::string const & i_module_name)
 {
   Module_ptr_t module;
@@ -77,15 +79,16 @@ Module_ptr_t create_module(std::string const & i_module_name)
   }
   return module;
 }
+*/
 
 void build_description(po::options_description & o_description, Module_ptr_t i_program)
 { 
   logdeb << "adding generic options" << endl;
   po::options_description generic("Generic Options");
   generic.add_options()
-    ("help", "produce help message")
+    ("help,h", "produce help message")
     ("version,v", "output version information")
-    ("module", po::value<string>(), "instantiate module name")
+    ("module,m", po::value<string>(), "instantiate module name")
   ;
   o_description.add(generic);
   
@@ -107,6 +110,15 @@ void usage()
   std::cerr << endl
             << "Usage: " << g_program_name << " [options]" << endl
             << g_parameter_description << endl;
+
+  auto & registry = GET_FACTORY(mkay::Module);
+  std::cerr << "registered module types:" << std::endl;
+  for ( auto it = registry.begin(); 
+        it != registry.end(); 
+        ++it )
+  {
+    std::cerr << " * " << it->first << std::endl;
+  }
 }
 
 void parse_arguments(int argc, char **argv, po::variables_map & i_parameters, Module_ptr_t i_program = Module_ptr_t{})
@@ -116,7 +128,7 @@ void parse_arguments(int argc, char **argv, po::variables_map & i_parameters, Mo
     logdeb << "parsing arguments" << std::endl;
     po::options_description description;
     build_description(description, i_program);
-   ;
+
     if ( !i_program )
     {
       po::command_line_parser clp(argc, argv);
@@ -194,7 +206,7 @@ int main(int argc, char ** argv)
     }
     
     // create module name
-    program = create_module(module_name);
+    program = registry::create<Module>(module_name);
     if ( !program )
     {
       logerr << "could not create module: " << module_name << endl;

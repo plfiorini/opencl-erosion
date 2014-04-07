@@ -19,7 +19,7 @@ namespace mkay
   typedef boost::error_info<struct tag_error_int32_t, int32_t> errinfo_int32_t; 
   
   class Mkay_exception
-    : public boost::exception
+    : public virtual boost::exception
     , public virtual std::exception
   {
   public:

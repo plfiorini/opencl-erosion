@@ -35,7 +35,7 @@ namespace mkay
     virtual ~Module_erosion();
     
     /// static module type name function
-    static const char * get_module_type() { return "erosion"; }
+    static const char * get_type_name() { return "erosion"; }
     
   private:
     const int32_t c_default_width = 1280, c_default_height = 768;
@@ -59,8 +59,6 @@ namespace mkay
     void update_scene();
     void render_scene();    
   };
-  
-  typedef std::shared_ptr<Module> Module_ptr_t;
 } // namespace mkay
 
 #endif // __MODULE_EROSION_H__

@@ -234,8 +234,8 @@ namespace mkay
         
         // provide dummy parameters for glutInit
         int argc = 1;
-        char *name = "asdfg";
-        glutInit(&argc, &name);
+        char *argv[] = { static_cast<char*>("empty") };
+        glutInit(&argc, argv);
         
         config_ok = true;
       }
