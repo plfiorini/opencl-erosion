@@ -3,7 +3,7 @@
 #define __MODULE_H__
 
 #include <boost/program_options.hpp>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace mkay
 {
@@ -28,7 +28,7 @@ namespace mkay
   };
   
   /// \brief smart pointer typedef for Module
-  typedef boost::shared_ptr<Module> Module_ptr_t;  
+  typedef std::shared_ptr<Module> Module_ptr_t;  
 } // namespace mkay
 
 #endif // __MODULE_H__

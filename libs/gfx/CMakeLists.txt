@@ -2,14 +2,16 @@ project(gfx)
 
 include(build_functions)
 
+list(APPEND LIBS common)
+
 add_standard_lib(
-  common
+  ${LIBS}  
 )
 
 use_opengl()
 use_devil()
-use_third_party(libsdl2)
-use_third_party(libsdl2_ttf)
+use_sdl()
+use_sdlttf()
 use_boost(filesystem)
 
 use_shader(

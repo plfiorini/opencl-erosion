@@ -2,20 +2,20 @@
 #ifndef __SDL_EVENT_MANAGER_H__
 #define __SDL_EVENT_MANAGER_H__
 
-struct SDL_KeyboardEvent;
-struct SDL_WindowEvent;
-struct SDL_MouseMotionEvent;
-
 #include <cstddef>
 
 #include <common/include/Tools.h>
 #include <common/include/glm_definitions.h>
 
+struct SDL_KeyboardEvent;
+struct SDL_WindowEvent;
+struct SDL_MouseMotionEvent;
+
 namespace mkay 
 {
   class Camera;
   class SDL_window_manager;
-  
+	  
   enum class Movement
   {
     Left      = 0,

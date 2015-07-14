@@ -9,6 +9,8 @@ find_file(
 
 if(NOT version_gen_hpp_in)
   message(FATAL "Cannot find version_gen.hpp.in")
+else()
+  get_filename_component(version_gen_hpp_in "${version_gen_hpp_in}" REALPATH)
 endif()
 
 find_file(
@@ -20,6 +22,8 @@ find_file(
 
 if(NOT version_gen_fwd_hpp_in)
   message(FATAL "Cannot find version_gen_fwd.hpp.in")
+else()
+  get_filename_component(version_gen_fwd_hpp_in "${version_gen_fwd_hpp_in}" REALPATH)
 endif()
 
 find_file(
@@ -31,6 +35,8 @@ find_file(
 
 if(NOT version_gen_cpp_in)
   message(FATAL "Cannot find version_gen.cpp.in")
+else()  
+  get_filename_component(version_gen_cpp_in "${version_gen_cpp_in}" REALPATH)
 endif()
 
 find_program(date_tool "date"         DOC "the common date tool")
@@ -102,9 +108,9 @@ function(generate_version_info)
   set(top_level_generation_path "include")
   set(GENERATION_DIR generated/${top_level_generation_path})
 
-  file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${GENERATION_DIR})
-
   set(generation_path ${CMAKE_CURRENT_BINARY_DIR}/${GENERATION_DIR})
+  file(MAKE_DIRECTORY ${generation_path})
+  log_info("created directory: ${generation_path}")  
 
   set(generate_version_gen_hpp     ${generation_path}/version_gen.hpp)
   set(generate_version_gen_fwd_hpp ${generation_path}/version_gen_fwd.hpp)
@@ -127,15 +133,15 @@ function(generate_version_info)
   # set platform name
   set(PLATFORM_VERSION "${CMAKE_SYSTEM_NAME}, ${CMAKE_SYSTEM_PROCESSOR}")
 
-  # Generate version info files
-  configure_file(${version_gen_hpp_in}     ${generate_version_gen_hpp})
-  configure_file(${version_gen_fwd_hpp_in} ${generate_version_gen_fwd_hpp})
-  configure_file(${version_gen_cpp_in}     ${generate_version_gen_cpp})
+  # Generate version info files 
+  configure_file("${version_gen_hpp_in}"     "${generate_version_gen_hpp}")
+  configure_file("${version_gen_fwd_hpp_in}" "${generate_version_gen_fwd_hpp}")
+  configure_file("${version_gen_cpp_in}"     "${generate_version_gen_cpp}")
 
   # set version info implementation in parent scope
-  set(generate_version_gen_hpp ${generate_version_gen_hpp} PARENT_SCOPE)
-  set(generate_version_gen_fwd_hpp ${generate_version_gen_fwd_hpp} PARENT_SCOPE)
-  set(generate_version_gen_cpp ${generate_version_gen_cpp} PARENT_SCOPE)
+  set(generate_version_gen_hpp "${generate_version_gen_hpp}" PARENT_SCOPE)
+  set(generate_version_gen_fwd_hpp "${generate_version_gen_fwd_hpp}" PARENT_SCOPE)
+  set(generate_version_gen_cpp "${generate_version_gen_cpp}" PARENT_SCOPE)
 
 endfunction()
 

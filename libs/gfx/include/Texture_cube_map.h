@@ -2,7 +2,7 @@
 #ifndef __TEXTURE_CUBE_MAP_H__
 #define __TEXTURE_CUBE_MAP_H__
 
-#include <GL/gl.h>
+#include <gfx/include/OpenGL_Headers.h>
 
 #include <gfx/include/Abstract_texture.h>
 

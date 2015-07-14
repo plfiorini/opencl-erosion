@@ -1,5 +1,5 @@
-add_subdirectory(common)
-#add_subdirectory(database)
-add_subdirectory(module)
 add_subdirectory(cl)
+add_subdirectory(common)
 add_subdirectory(gfx)
+add_subdirectory(module)
+add_subdirectory(platform)

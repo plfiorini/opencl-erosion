@@ -4,8 +4,9 @@
 #include <common/include/Logger.h>
 #include <common/include/glm_definitions.h>
 
-#include <SDL2/SDL.h>
 #include <boost/iterator/iterator_concepts.hpp>
+
+#include <SDL2/SDL.h>
 
 using namespace std;
 

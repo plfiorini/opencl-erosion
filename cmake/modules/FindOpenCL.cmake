@@ -61,22 +61,33 @@ ELSE (APPLE)
 		FIND_PATH(_OPENCL_CPP_INCLUDE_DIRS CL/cl.hpp PATHS "${_OPENCL_INC_CAND}" ENV OpenCL_INCPATH)
 
 	ELSE (WIN32)
-	
+	   
     FIND_PATH( OPENCL_ROOT_DIR
       NAMES OpenCL/cl.h include/CL/cl.h include/nvidia-current/CL/cl.h
-      PATHS ENV OCLROOT
-            ENV AMDAPPSDKROOT
-            ENV CUDA_PATH
-            ENV INTELOCLSDKROOT
+      PATHS "$ENV{OCLROOT}"
+            "$ENV{AMDAPPSDKROOT}"
+            "$ENV{CUDA_PATH}"
+            "$ENV{INTELOCLSDKROOT}"
       PATH_SUFFIXES cuda
       DOC "OpenCL root directory")
+      
+    message(STATUS "OPENCL_ROOT_DIR: ${OPENCL_ROOT_DIR}")
 
 		# Unix style platforms
 		FIND_LIBRARY(OPENCL_LIBRARIES OpenCL
-			PATHS ${OPENCL_ROOT_DIR}/lib ${OPENCL_ROOT_DIR}/lib64 "/usr/lib/fglrx" ENV LD_LIBRARY_PATH ENV OpenCL_LIBPATH "/usr/lib"
+			PATHS "${OPENCL_ROOT_DIR}/lib"
+            "${OPENCL_ROOT_DIR}/lib64"      
+            "${OPENCL_ROOT_DIR}/lib/x86"
+            "${OPENCL_ROOT_DIR}/lib/x86_64"
+            "/usr/lib/fglrx" 
+            "$ENV{LD_LIBRARY_PATH}"
+            "$ENV{OpenCL_LIBPATH}"
+            "/usr/lib"
       NO_DEFAULT_PATH
 		)
-
+    
+    message(STATUS "OPENCL_LIBRARIES: ${OPENCL_LIBRARIES}")
+    
 		GET_FILENAME_COMPONENT(OPENCL_LIB_DIR ${OPENCL_LIBRARIES} PATH)
 		GET_FILENAME_COMPONENT(_OPENCL_INC_CAND ${OPENCL_LIB_DIR}/../../include ABSOLUTE)
 

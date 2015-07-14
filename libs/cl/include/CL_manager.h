@@ -3,6 +3,7 @@
 #define __CL_MANAGER_H__
 
 //#define __CL_ENABLE_EXCEPTIONS
+#define CL_USE_DEPRECATED_OPENCL_2_0_APIS
 #include <CL/cl.hpp>
 
 namespace mkay

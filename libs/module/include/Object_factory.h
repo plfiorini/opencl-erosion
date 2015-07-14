@@ -13,7 +13,7 @@ namespace registry
 {
   /// \brief create function prototype
   template <typename ObjectType>
-  boost::shared_ptr<ObjectType> create(std::string const & i_name);
+  std::shared_ptr<ObjectType> create(std::string const & i_name);
 
   /// \brief error info typedef
   typedef boost::error_info<struct tag_registry_info, std::string> Registry_info;
@@ -122,7 +122,7 @@ namespace registry
 
   /// \brief factory create function
   template <typename ObjectType>
-  boost::shared_ptr<ObjectType> create(std::string const & i_name)
+  std::shared_ptr<ObjectType> create(std::string const & i_name)
   {
     typename detail::Def<ObjectType>::Object_registry& reg = detail::get_object_registry<ObjectType>();
     typename detail::Def<ObjectType>::Object_registry::iterator it = reg.find(i_name);
@@ -135,7 +135,7 @@ namespace registry
     }
     
     typename detail::Def<ObjectType>::Create_object_func func = it->second;
-    boost::shared_ptr<ObjectType> temp_ptr( func() );
+    std::shared_ptr<ObjectType> temp_ptr( func() );
     return temp_ptr;
   }
 

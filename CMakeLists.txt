@@ -2,7 +2,7 @@
 project(opencl-erosion)
 
 # CMake requests a specification of the minimum version
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 2.8.4)
 
 # include CMake modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_HOME_DIRECTORY}/cmake/modules)

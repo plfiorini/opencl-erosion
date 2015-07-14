@@ -4,7 +4,10 @@
 
 #include <string>
 
-#include <GL/gl.h>
+#include <platform/include/Platform.h>
+
+#include <gfx/include/OpenGL_Headers.h>
+
 #include <IL/il.h>
 
 class Shader_program;

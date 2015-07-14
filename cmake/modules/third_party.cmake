@@ -1,9 +1,11 @@
 function(add_include_dependency include_path)
   log_debug("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}") 
-  if(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
-    string(REPLACE "${include_path}" "" deps ${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}})
-  endif()
-  set(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${deps}" "${include_path}" CACHE INTERNAL "${PROJECT_NAME} include dependencies" FORCE)
+  # if(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
+    # string(REPLACE "${include_path}" "" deps ${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}})
+  # endif()
+  list(APPEND ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${include_path}")
+  list(REMOVE_DUPLICATES ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
+  set(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}}" "${include_path}" CACHE INTERNAL "${PROJECT_NAME} include dependencies" FORCE)
 endfunction(add_include_dependency)
 
 #
@@ -48,9 +50,9 @@ endfunction(use_sqlite3)
 function(use_opencl)
   find_package(OpenCL REQUIRED)
 
-  include_directories( ${OPENCL_INCLUDE_DIRS} )
+  include_directories(${OPENCL_INCLUDE_DIRS})
   if( OPENCL_HAS_CPP_BINDINGS )
-    log_info( "OpenCL has CPP bindings. Full include is: " ${OPENCL_INCLUDE_DIRS} )
+    log_info( "OpenCL has CPP bindings. Full include is: ${OPENCL_INCLUDE_DIRS}")
   else( OPENCL_HAS_CPP_BINDINGS )
     log_info( "No OpenCL CPP bindings found" )
   endif( OPENCL_HAS_CPP_BINDINGS )
@@ -71,14 +73,23 @@ function(use_boost)
       use_system_library(${libname})
     endforeach()
   elseif( "${CMAKE_SYSTEM_NAME}" STREQUAL "Windows" )
-    set(BOOST_INCLUDE_PATH "W:\\development\\boost_1_51_0" CACHE PATH  "Set the include path to the boost libraries")
+    set(BOOST_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\boost_1_58_0" CACHE PATH  "Set the include path to the boost libraries")
     include_directories(${BOOST_INCLUDE_PATH})
     add_include_dependency(${BOOST_INCLUDE_PATH})
-    set(BOOST_LIB_PATH "W:\\development\\boost_1_51_0\\stage\\lib"  CACHE PATH  "Set the library path to the boost libraries")
-    use_user_library( 
+    set(BOOST_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\boost_1_58_vc120\\lib"  CACHE PATH  "Set the library path to the boost libraries")
+	set(BOOST_PREFIX "libboost_")
+	use_user_library( 
       SEARCH_PATH "${BOOST_LIB_PATH}"
-      PREFIX "libboost_"
-      POSTFIX "-vc90-mt-1_51"
+      PREFIX "${BOOST_PREFIX}"
+      POSTFIX "-vc120-mt-gd-1_58"
+	  BUILD_TYPE "debug"
+      ${ARGN}
+    )
+	use_user_library( 
+      SEARCH_PATH "${BOOST_LIB_PATH}"
+      PREFIX "${BOOST_PREFIX}"
+      POSTFIX "-vc120-mt-1_58"
+	  BUILD_TYPE "general"
       ${ARGN}
     )
   endif()
@@ -88,18 +99,72 @@ function(use_opengl)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     use_system_library(GL GLEW glut)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    use_system_library(OpenGL32)  
+	log_info("Using Windows OpenGL Extension Headers: ${WINDOWS_OPENGL_EXTENSIONS}")
+	include_directories(${WINDOWS_OPENGL_EXTENSIONS})
+    use_system_library(OpenGL32)
+	
+	set(GLEW_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\glew-1.12.0\\include" CACHE PATH "Set the include path to the GLEW libraries")
+    include_directories(${GLEW_INCLUDE_PATH})
+    add_include_dependency(${GLEW_INCLUDE_PATH})
+    set(GLEW_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\glew-1.12.0\\lib\\Release\\Win32" CACHE PATH  "Set the library path to the GLEW libraries")
+    use_user_library(
+      SEARCH_PATH ${GLEW_LIB_PATH}
+      glew32
+    )
+	
+	set(GLUT_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\freeglut-3.0.0-1\\include" CACHE PATH "Set the include path to the GLUT libraries")
+    include_directories(${GLUT_INCLUDE_PATH})
+    add_include_dependency(${GLUT_INCLUDE_PATH})
+    set(GLUT_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\freeglut-3.0.0-1\\lib" CACHE PATH  "Set the library path to the GLUT libraries")
+    use_user_library(
+      SEARCH_PATH ${GLUT_LIB_PATH}
+      freeglut
+    )
   endif()
 endfunction(use_opengl)
+
+function(use_sdl)
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	use_third_party(libsdl2)
+  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+	use_third_party(libsdl2)
+	use_system_library(
+	  winmm.lib
+      version.lib
+      Imm32.lib
+	)
+  endif()
+endfunction(use_sdl)
+
+function(use_sdlttf)
+  if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+	use_third_party(libsdl2_ttf)
+  elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
+	include_directories(${libsdl2_HEADERS}/SDL2)
+    set(SDLTTF_INCLUDE_PATH "${CMAKE_SOURCE_DIR}\\third_party\\libsdl2_ttf\\win\\include" CACHE PATH "Set the include path to the SDL TTF libraries")
+    include_directories(${SDLTTF_INCLUDE_PATH})
+    add_include_dependency(${SDLTTF_INCLUDE_PATH})
+    set(SDLTTF_LIB_PATH "${CMAKE_SOURCE_DIR}\\third_party\\libsdl2_ttf\\win\\lib" CACHE PATH  "Set the library path to the SDL TTF libraries")
+    use_user_library(
+      SEARCH_PATH ${SDLTTF_LIB_PATH}
+      SDL_ttf_VS2013
+    )
+	set(FREETYPE_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}/freetype-2.6_vc120/lib" CACHE PATH  "Set the library path to the freetype libraries")
+	use_user_library(
+	  SEARCH_PATH ${FREETYPE_LIB_PATH}
+	  freetype26MT
+	)	
+  endif()
+endfunction(use_sdlttf)
 
 function(use_devil)
   if("${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
     use_system_library(IL ILU ILUT)
   elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
-    set(DEVIL_INCLUDE_PATH "W:\\development\\DevIL\\include" CACHE PATH "Set the include path to the DevIL libraries")
+    set(DEVIL_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\DevIL\\include" CACHE PATH "Set the include path to the DevIL libraries")
     include_directories(${DEVIL_INCLUDE_PATH})
     add_include_dependency(${DEVIL_INCLUDE_PATH})
-    set(DEVIL_LIB_PATH "W:\\development\\DevIL\\lib" CACHE PATH  "Set the library path to the DevIL libraries")
+    set(DEVIL_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\DevIL\\lib" CACHE PATH  "Set the library path to the DevIL libraries")
     use_user_library(
       SEARCH_PATH ${DEVIL_LIB_PATH}
       DevIL ILU ILUT
@@ -118,7 +183,7 @@ function(use_system_library)
       )
     elseif("${CMAKE_SYSTEM_NAME}" STREQUAL "Windows")
       find_library(${name}_LIB ${name}
-        PATHS "C:/Program Files/Microsoft SDKs/Windows/v7.0/Lib"
+        PATHS "C:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Lib"
         DOC "Fully qualified library path of ${name}"
       )  
     endif()
@@ -153,7 +218,7 @@ function(use_third_party name)
 endfunction(use_third_party)
 
 function(use_user_library)
-  cmake_parse_arguments( USER_LIB "" "SEARCH_PATH;PREFIX;POSTFIX" "" ${ARGN} )
+  cmake_parse_arguments( USER_LIB "" "SEARCH_PATH;PREFIX;POSTFIX;BUILD_TYPE" "" ${ARGN} )
   
   foreach(name ${USER_LIB_UNPARSED_ARGUMENTS})
     if( USER_LIB_PREFIX )
@@ -175,8 +240,17 @@ function(use_user_library)
       log_info("use_user_library: Using library ${${name}_USER_LIB}")
     endif()
 
-    target_link_libraries(${PROJECT_NAME}
-      ${${name}_USER_LIB}
-    )
+	if( USER_LIB_BUILD_TYPE )
+      target_link_libraries(
+	    ${PROJECT_NAME}
+		${USER_LIB_BUILD_TYPE}
+        ${${name}_USER_LIB}
+      )
+	else()
+      target_link_libraries(
+	    ${PROJECT_NAME}
+        ${${name}_USER_LIB}
+      )
+	endif()
   endforeach()
 endfunction(use_user_library)

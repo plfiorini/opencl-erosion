@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 
+#include <gl/glew.h>
 #include <SDL2/SDL.h>
 
 #include <common/include/glm_definitions.h>

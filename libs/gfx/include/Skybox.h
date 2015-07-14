@@ -4,13 +4,11 @@
 
 #include <memory>
 
-#include <gfx/include/Shader_program.h>
-#include <gfx/include/Texture_cube_map.h>
-
 namespace mkay
 {
-
-class Texture;
+	class Shader_program;
+	class Texture_cube_map;
+	class Texture;
   class Camera;
   
   class Skybox

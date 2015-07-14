@@ -93,7 +93,7 @@ function(private_add_standard_lib library_type)
   set(TARGET_NAME "${PROJECT_NAMESPACE}${PROJECT_NAME}")
 
   # The source files
-  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
+  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c" "include/*.h" "include/*.hpp")
 
   # Path for internal header files
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
@@ -163,7 +163,7 @@ function(private_add_standard_module library_type)
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
   # The source files
-  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
+  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c" "include/*.h" "include/*.hpp")
 
   # Path for internal header files
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
@@ -226,7 +226,7 @@ function(add_standard_executable)
   # unrecognized parameters can be found in INSTALL_UNPARSED_ARGUMENTS
 
   # The source files
-  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
+  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c" "include/*.h" "include/*.hpp")
 
   # Path for internal header files
   include_directories("${CMAKE_CURRENT_SOURCE_DIR}/source")
@@ -376,12 +376,14 @@ function(add_cmake_third_party)
     endforeach()
   endif()
   set(${PROJECT_NAME}_LIBS ${libraries} CACHE INTERNAL "Libraries of ${PROJECT_NAME}")
+  set(${PROJECT_NAME}_HEADERS ${TRD_STAGE_DIR}/include CACHE INTERNAL "Headers of ${PROJECT_NAME}")
+  log_info("Added cache variable for headers ${PROJECT_NAME}_HEADERS")
 endfunction(add_cmake_third_party)
 
 function(add_glsl_shader)
 
   # add c++ source files  
-  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c")
+  file(GLOB ${PROJECT_NAME}_srcs "source/*.cpp" "source/*.C" "source/*.c" "include/*.h" "include/*.hpp")
   if(${PROJECT_NAME}_srcs)
     log_info("add_glsl_shader: adding static library for shader ${PROJECT_NAME}")
     add_library(${PROJECT_NAME} STATIC

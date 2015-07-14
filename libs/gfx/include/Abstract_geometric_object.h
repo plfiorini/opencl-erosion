@@ -54,7 +54,7 @@ namespace mkay
     Shader_program * get_shader() { return m_material->get_shader(); }
     
   protected:   
-    GLuint m_vbo_id[to_integral(VBO_type::Count)] = {0u, 0u, 0u};
+		GLuint m_vbo_id[to_integral(VBO_type::Count)];
     GLsizei m_triangle_count = 0;
     
     glm::mat4 m_model_matrix;

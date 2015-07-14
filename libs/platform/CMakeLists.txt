@@ -1,4 +1,4 @@
-project(module)
+project(platform)
 
 include(build_functions)
 

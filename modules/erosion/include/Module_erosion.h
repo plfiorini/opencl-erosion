@@ -4,6 +4,9 @@
 
 #include <memory>
 
+#include <gfx/include/OpenGL_Headers.h>
+#include <cl/include/CL_manager.h>
+
 #include <module/include/Module.h>
 
 #include <common/include/Time_measurement.h>
@@ -15,12 +18,8 @@
 #include <gfx/include/Skybox.h>
 #include <gfx/include/Cube.h>
 
-#include <cl/include/CL_manager.h>
-
 namespace mkay
 {
-  class Shader_program;
-  
   class Module_erosion 
     : public Module
   {

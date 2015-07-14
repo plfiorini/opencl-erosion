@@ -2,12 +2,16 @@
 #ifndef __TEXTURE_H__
 #define __TEXTURE_H__
 
-#include <GL/gl.h>
+#include <platform/include/Platform.h>
+
+#include <gfx/include/OpenGL_Headers.h>
 
 #include <gfx/include/Abstract_texture.h>
 
 namespace mkay
 {
+	class Shader_program;
+
   class Texture
     : public Abstract_texture
   {    

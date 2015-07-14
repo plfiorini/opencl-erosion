@@ -1,3 +1,8 @@
+#define _USE_MATH_DEFINES
+#include <cmath>
+
+#include <gl/glew.h>
+
 #include <erosion/include/Module_erosion.h>
 #include <common/include/Logger.h>
 
@@ -6,13 +11,8 @@
 #include <gfx/include/Material_factory.h>
 #include <gfx/include/Colored_material.h>
 
-#include <CL/cl.hpp>
-
 #include <common_shader/include/vars.hgl>
 #include <color_shader/include/vars.hgl>
-
-#define _USE_MATH_DEFINES
-#include <cmath>
 
 using namespace std;
 namespace po = boost::program_options;

@@ -2,6 +2,8 @@
 # set installer prefix
 set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE INTERNAL "Set the install prefix")
 
+set(WINDOWS_LIBRARY_BASE_PATH "D:\\development" CACHE PATH  "Base path for third party libraries on windows")
+
 # library (& module) build type
 if(WIN32)
   set(LIBRARY_BUILD_TYPE  "STATIC"  CACHE INTERNAL  "Set the library build type (STATIC or SHARED)")
@@ -14,6 +16,9 @@ set(TRD_STAGE_DIR "${CMAKE_BINARY_DIR}/stage/third_party" CACHE INTERNAL "Stage 
 set(PROJECT_NAMESPACE   "mkay_"    CACHE INTERNAL  "Prefix for project artifacts")
 
 set(PROJECT_DEPENDENCY_POSTFIX "_dependant_headers" CACHE INTERNAL "Postfix for project header dependencies")
+
+add_definitions(-DBOOST_ALL_NO_LIB)
+add_definitions(-DSDL_MAIN_HANDLED)
 
 # set & create output directories
 set(STATICLIB_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/output/lib)

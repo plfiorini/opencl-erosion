@@ -1,18 +1,20 @@
 #include <iostream>
 #include <sstream>
+#include <chrono>
+#include <thread>
 
-#include <unistd.h>
-#include <signal.h>
+#include <platform/include/Platform.h>
+#include <GL/glew.h>
 
 #include <common/include/Mkay_exception.h>
 #include <common/include/Logger.h>
 #include <module/include/Configuration_exception.h>
 #include <module/include/Object_factory.h>
+#include <platform/include/Signal_handler.h>
 #include <erosion/include/Module_erosion.h>
 
 #include <generated/include/version_gen_fwd.hpp>
 
-#include <GL/gl.h>
 #include <SDL2/SDL.h>
 
 #include <boost/program_options.hpp>
@@ -26,60 +28,11 @@ static volatile bool g_exit_flag = false;
 static std::string g_parameter_description{""};
 static std::string g_program_name{""};
 
-void signal_handler(int signum) 
+void exit_program(mkay::Signal signal)
 {
-  std::stringstream os;
-  os << "received signal: ";
-  switch (signum) 
-  {
-    case SIGHUP:
-      os << "SIGHUP";
-      break;
-    case SIGINT:
-      os << "SIGINT";
-      g_exit_flag = true;
-      break;
-    case SIGTERM:
-      os << "SIGTERM";
-      g_exit_flag = true;
-      break;
-    case SIGQUIT:
-      os << "SIGQUIT";
-      g_exit_flag = true;
-      break;
-    case SIGUSR1:
-      os << "SIGUSR1";
-      break;
-    case SIGPIPE:
-      os << "SIGPIPE";
-      break;
-    case SIGALRM:
-      os << "SIGALRM";
-      break;
-    case SIGCHLD:
-      os << "SIGCHLD";
-      break;
-    case SIGXFSZ:
-      os << "SIGCHLD";
-      break;
-    default:
-      break;
-  }
-  logdeb << os.str() << std::endl;
+	g_exit_flag = true;
+  logdeb << "received signal: " << signal << std::endl;
 }
-
-/// Module Creation Factory
-/*
-Module_ptr_t create_module(std::string const & i_module_name)
-{
-  Module_ptr_t module;
-  if ( i_module_name == Module_erosion::get_module_type() )
-  {
-    module = Module_ptr_t( new Module_erosion() );
-  }
-  return module;
-}
-*/
 
 void build_description(po::options_description & o_description, Module_ptr_t i_program)
 { 
@@ -162,15 +115,10 @@ int main(int argc, char ** argv)
 { 
   g_program_name = string{argv[0]};
   
-  signal(SIGHUP,  signal_handler);
-  signal(SIGINT,  signal_handler);
-  signal(SIGQUIT, signal_handler);
-  signal(SIGUSR1, signal_handler);
-  signal(SIGPIPE, signal_handler);
-  signal(SIGALRM, signal_handler);
-  signal(SIGTERM, signal_handler);
-  signal(SIGCHLD, signal_handler);
-  signal(SIGXFSZ, signal_handler);
+	Signal_handler signal_handler;
+	signal_handler.set(Signal::INT, exit_program);
+	signal_handler.set(Signal::TERM, exit_program);
+	signal_handler.set(Signal::QUIT, exit_program);
   
   Logger::init_defaults();
   Logger::set_verbosity(Log_level::Debug);
@@ -238,7 +186,7 @@ int main(int argc, char ** argv)
     while ( false == program->requests_exit() && false == g_exit_flag )
     {
       program->step();
-      usleep(1000);
+			std::this_thread::sleep_for(std::chrono::microseconds(1000));
     }
     
     loginf << "commencing shutdown" << std::endl;
@@ -250,4 +198,5 @@ int main(int argc, char ** argv)
   }
   
   loginf << "end of line" << std::endl;
+	return 0;
 }

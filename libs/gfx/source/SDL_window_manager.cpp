@@ -5,9 +5,7 @@
 #include <sstream>
 #include <list>
 
-#ifdef WIN32
-	#include <Windows.h>
-#endif
+#include <platform/include/Platform.h>
 #include <GL/glew.h>
 #include <GL/glut.h>
 
@@ -18,9 +16,14 @@ using namespace std;
 
 namespace mkay
 {
-  void gl_error_callback( 
-    GLenum source, GLenum type, GLuint id, GLuint severity,
-    GLsizei length, const char *message, void *user_parameter )
+	// typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam);
+	void APIENTRY gl_error_callback(GLenum source,
+		GLenum type,
+		GLuint id,
+		GLenum severity,
+		GLsizei length,
+		const GLchar* message,
+		const void* userParam)
   {
     std::stringstream stringStream;
     std::string sourceString;
@@ -93,18 +96,21 @@ namespace mkay
       break;
     }
  
-    stringStream << "OpenGL Error: " << message;
+    stringStream << "OpenGL Message: " << message;
     stringStream << " [Source = " << sourceString;
     stringStream << ", Type = " << typeString;
     stringStream << ", Severity = " << severityString;
     stringStream << ", ID = " << id << "]";
  
-    logerr << "throwing error ..." << endl;
+		if (type == GL_DEBUG_TYPE_ERROR_ARB)
+		{
+			logerr << "throwing error ..." << endl;
     
-    BOOST_THROW_EXCEPTION(
-      SDL_exception()
-        << errinfo_str(stringStream.str())
-    );
+			BOOST_THROW_EXCEPTION(
+				SDL_exception()
+					<< errinfo_str(stringStream.str())
+			);
+		}
   }
   
   void check_SDL_error(int line = -1, bool throw_ex = false)
@@ -233,10 +239,10 @@ namespace mkay
         }
         
         // provide dummy parameters for glutInit
-        int argc = 1;
-        char *argv[] = { static_cast<char*>("empty") };
-        glutInit(&argc, argv);
-        
+				int argc = 1;
+				char *argv[] = { static_cast<char*>("empty") };
+				glutInit(&argc, argv);
+
         config_ok = true;
       }
       catch(SDL_exception const & ex)
@@ -293,7 +299,7 @@ namespace mkay
     }
     loginf << os.str() << endl;
     
-    glDebugMessageCallbackARB(gl_error_callback, nullptr);
+    glDebugMessageCallback(mkay::gl_error_callback, nullptr);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB);
     
     loginf << "finished init" << endl;

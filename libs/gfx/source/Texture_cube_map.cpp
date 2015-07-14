@@ -14,8 +14,7 @@ namespace mkay
   {
     m_wrap_s = m_wrap_t = m_wrap_r = GL_CLAMP_TO_EDGE;
   }
-
-  
+	  
   void Texture_cube_map::set(Shader_program* i_shader, GLenum i_tex_unit, const char* i_shader_var)
   {
     glActiveTexture(i_tex_unit);
@@ -30,8 +29,8 @@ namespace mkay
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
     glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
 
-    if( m_anisotropic_filter_level > 0.0f )
-      glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropic_filter_level);
+		if (m_anisotropic_filter_level > 0.0f)
+			glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_ANISOTROPY_EXT, m_anisotropic_filter_level);
   }
   
   void Texture_cube_map::unset()
