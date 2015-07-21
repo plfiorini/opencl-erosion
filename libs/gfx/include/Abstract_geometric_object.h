@@ -25,7 +25,7 @@ namespace mkay
   void calculate_normals(
     const float * i_vertices, const uint32_t i_vertex_count,
     const uint32_t *i_indices, const uint32_t i_index_count,
-    float *o_normals 
+    float *o_normals, bool i_invert = false
   );
   
   class Abstract_geometric_object

@@ -10,7 +10,7 @@ namespace mkay
   void calculate_normals(
     const float * i_vertices, const uint32_t i_vertex_count,
     const uint32_t *i_indices, const uint32_t i_index_count,
-    float *o_normals ) 
+    float *o_normals, bool i_invert /* = false */) 
   {
     for(unsigned int i=0; i<i_index_count; i += 3) 
     {
@@ -25,7 +25,7 @@ namespace mkay
       glm::vec3 v1tov2 = v2-v1;
       glm::vec3 v1tov3 = v3-v1;
 
-      glm::vec3 n = glm::normalize(glm::cross(v1tov2, v1tov3));
+			glm::vec3 n = i_invert ? -glm::normalize(glm::cross(v1tov2, v1tov3)) : glm::normalize(glm::cross(v1tov2, v1tov3));
 
       o_normals[i1 + 0] = n.x;
       o_normals[i1 + 1] = n.y;

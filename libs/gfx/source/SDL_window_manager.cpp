@@ -16,7 +16,6 @@ using namespace std;
 
 namespace mkay
 {
-	// typedef void (APIENTRY *GLDEBUGPROCARB)(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, GLvoid* userParam);
 	void APIENTRY gl_error_callback(GLenum source,
 		GLenum type,
 		GLuint id,

@@ -12,6 +12,10 @@ namespace mkay
     {
       m_shader = RESMAN.get<Shader_program>("color_shader");
     }
+		else
+		{
+			m_shader = i_shader_hint;
+		}
   }
 
   void Colored_material::use()
