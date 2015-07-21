@@ -1,4 +1,5 @@
 project(gfx)
+reset_project()
 
 include(build_functions)
 

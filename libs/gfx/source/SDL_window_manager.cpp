@@ -7,7 +7,6 @@
 
 #include <platform/include/Platform.h>
 #include <GL/glew.h>
-#include <GL/glut.h>
 
 using namespace std;
 
@@ -237,11 +236,6 @@ namespace mkay
           );
         }
         
-        // provide dummy parameters for glutInit
-				int argc = 1;
-				char *argv[] = { static_cast<char*>("empty") };
-				glutInit(&argc, argv);
-
         config_ok = true;
       }
       catch(SDL_exception const & ex)

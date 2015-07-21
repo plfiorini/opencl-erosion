@@ -105,17 +105,17 @@ function(use_opengl)
 	set(GLEW_BIN_PATH "${GLEW_BASE_PATH}/bin/Release/Win32" CACHE PATH  "Set the bin path to the GLEW dlls")
 	add_dll_dependency("${GLEW_BIN_PATH}/glew32.dll")
 	
-	set(GLUT_BASE_PATH "${WINDOWS_LIBRARY_BASE_PATH}/freeglut-3.0.0-1")
-	set(GLUT_INCLUDE_PATH "${GLUT_BASE_PATH}/include" CACHE PATH "Set the include path to the GLUT libraries")
-    include_directories(${GLUT_INCLUDE_PATH})
-    add_include_dependency(${GLUT_INCLUDE_PATH})
-    set(GLUT_LIB_PATH "${GLUT_BASE_PATH}/lib" CACHE PATH  "Set the library path to the GLUT libraries")
-	use_user_library(
-      SEARCH_PATH ${GLUT_LIB_PATH}
-      freeglut
-    )
-	set(GLUT_BIN_PATH "${GLUT_BASE_PATH}/bin" CACHE PATH  "Set the bin path to the GLUT dlls")
-	add_dll_dependency("${GLUT_BIN_PATH}/freeglut.dll")
+	# set(GLUT_BASE_PATH "${WINDOWS_LIBRARY_BASE_PATH}/freeglut-3.0.0-1")
+	# set(GLUT_INCLUDE_PATH "${GLUT_BASE_PATH}/include" CACHE PATH "Set the include path to the GLUT libraries")
+    # include_directories(${GLUT_INCLUDE_PATH})
+    # add_include_dependency(${GLUT_INCLUDE_PATH})
+    # set(GLUT_LIB_PATH "${GLUT_BASE_PATH}/lib" CACHE PATH  "Set the library path to the GLUT libraries")
+	# use_user_library(
+      # SEARCH_PATH ${GLUT_LIB_PATH}
+      # freeglut
+    # )
+	# set(GLUT_BIN_PATH "${GLUT_BASE_PATH}/bin" CACHE PATH  "Set the bin path to the GLUT dlls")
+	# add_dll_dependency("${GLUT_BIN_PATH}/freeglut.dll")
   endif()
 endfunction(use_opengl)
 
