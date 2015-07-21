@@ -1,4 +1,5 @@
 project(starter)
+reset_project()
 
 include(build_functions)
 

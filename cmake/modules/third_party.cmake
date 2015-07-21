@@ -1,13 +1,3 @@
-function(add_include_dependency include_path)
-  log_debug("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}") 
-  # if(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
-    # string(REPLACE "${include_path}" "" deps ${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}})
-  # endif()
-  list(APPEND ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${include_path}")
-  list(REMOVE_DUPLICATES ${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX})
-  set(${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX} "${${PROJECT_NAME}${PROJECT_DEPENDENCY_POSTFIX}}" "${include_path}" CACHE INTERNAL "${PROJECT_NAME} include dependencies" FORCE)
-endfunction(add_include_dependency)
-
 #
 # This function extends the include path for the use of the sqlite3 library
 # for the project defined by ${PROJECT_NAMESPACE}${PROJECT_NAME}
@@ -103,23 +93,29 @@ function(use_opengl)
 	include_directories(${WINDOWS_OPENGL_EXTENSIONS})
     use_system_library(OpenGL32)
 	
-	set(GLEW_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\glew-1.12.0\\include" CACHE PATH "Set the include path to the GLEW libraries")
+	set(GLEW_BASE_PATH "${WINDOWS_LIBRARY_BASE_PATH}/glew-1.12.0")
+	set(GLEW_INCLUDE_PATH "${GLEW_BASE_PATH}/include" CACHE PATH "Set the include path to the GLEW libraries")
     include_directories(${GLEW_INCLUDE_PATH})
     add_include_dependency(${GLEW_INCLUDE_PATH})
-    set(GLEW_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\glew-1.12.0\\lib\\Release\\Win32" CACHE PATH  "Set the library path to the GLEW libraries")
+    set(GLEW_LIB_PATH "${GLEW_BASE_PATH}/lib/Release/Win32" CACHE PATH  "Set the library path to the GLEW libraries")
     use_user_library(
       SEARCH_PATH ${GLEW_LIB_PATH}
       glew32
     )
+	set(GLEW_BIN_PATH "${GLEW_BASE_PATH}/bin/Release/Win32" CACHE PATH  "Set the bin path to the GLEW dlls")
+	add_dll_dependency("${GLEW_BIN_PATH}/glew32.dll")
 	
-	set(GLUT_INCLUDE_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\freeglut-3.0.0-1\\include" CACHE PATH "Set the include path to the GLUT libraries")
+	set(GLUT_BASE_PATH "${WINDOWS_LIBRARY_BASE_PATH}/freeglut-3.0.0-1")
+	set(GLUT_INCLUDE_PATH "${GLUT_BASE_PATH}/include" CACHE PATH "Set the include path to the GLUT libraries")
     include_directories(${GLUT_INCLUDE_PATH})
     add_include_dependency(${GLUT_INCLUDE_PATH})
-    set(GLUT_LIB_PATH "${WINDOWS_LIBRARY_BASE_PATH}\\freeglut-3.0.0-1\\lib" CACHE PATH  "Set the library path to the GLUT libraries")
-    use_user_library(
+    set(GLUT_LIB_PATH "${GLUT_BASE_PATH}/lib" CACHE PATH  "Set the library path to the GLUT libraries")
+	use_user_library(
       SEARCH_PATH ${GLUT_LIB_PATH}
       freeglut
     )
+	set(GLUT_BIN_PATH "${GLUT_BASE_PATH}/bin" CACHE PATH  "Set the bin path to the GLUT dlls")
+	add_dll_dependency("${GLUT_BIN_PATH}/freeglut.dll")
   endif()
 endfunction(use_opengl)
 
@@ -169,6 +165,9 @@ function(use_devil)
       SEARCH_PATH ${DEVIL_LIB_PATH}
       DevIL ILU ILUT
     )
+	add_dll_dependency("${DEVIL_LIB_PATH}/DevIL.dll")
+	add_dll_dependency("${DEVIL_LIB_PATH}/ILU.dll")
+	add_dll_dependency("${DEVIL_LIB_PATH}/ILUT.dll")
   endif()
 endfunction(use_devil)
 

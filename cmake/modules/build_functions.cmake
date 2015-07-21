@@ -26,11 +26,11 @@ function(private_add_project_libraries target_name)
     list(APPEND link_libraries "${ll}")
 
     # look out for header dependencies of this lib
-    log_debug("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
+    log_debug("Testing var ${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}")
     set(header_deps "")
-    if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
-      log_debug("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
-      foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
+    if(${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX})
+      log_debug("Content: ${${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}}")
+      foreach(hd ${${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}})
         log_debug("Adding include path ${hd}")
 
         # also add include path to my depencenies
@@ -47,10 +47,10 @@ endfunction(private_add_project_libraries)
 function(private_add_project_headers)
   foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
     # look out for header dependencies of this lib
-    log_debug("Testing var ${ll}${PROJECT_DEPENDENCY_POSTFIX}")
-    if(${ll}${PROJECT_DEPENDENCY_POSTFIX})
-      log_debug("Content: ${${ll}${PROJECT_DEPENDENCY_POSTFIX}}")
-      foreach(hd ${${ll}${PROJECT_DEPENDENCY_POSTFIX}})
+    log_debug("Testing var ${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}")
+    if(${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX})
+      log_debug("Content: ${${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}}")
+      foreach(hd ${${ll}${PROJECT_HEADER_DEPENDENCY_POSTFIX}})
         log_debug("Adding include path ${hd}")
         include_directories(${hd})
 
@@ -60,6 +60,28 @@ function(private_add_project_headers)
     endif()
   endforeach()
 endfunction(private_add_project_headers)
+
+function(private_add_project_dlls add_dlls)
+  foreach(ll ${INSTALL_UNPARSED_ARGUMENTS})
+    # look out for header dependencies of this lib
+    log_debug("Testing var ${ll}${PROJECT_DLL_DEPENDENCY_POSTFIX}")
+    if(${ll}${PROJECT_DLL_DEPENDENCY_POSTFIX})
+      log_debug("Content: ${${ll}${PROJECT_DLL_DEPENDENCY_POSTFIX}}")
+      foreach(hd ${${ll}${PROJECT_DLL_DEPENDENCY_POSTFIX}})
+	    #log_debug("MY Content: ${${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX}}")
+	    if(NOT ${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX} MATCHES "${hd}")
+		  if(${add_dlls})
+		    log_info("Adding DLL copy rule for ${hd}")
+		    private_add_dll(${hd})
+		  endif()
+		endif()
+
+        # also add dll path to my depencenies
+        add_dll_dependency(${hd})        
+      endforeach()
+    endif()
+  endforeach()
+endfunction(private_add_project_dlls)
 
 #
 # This function generates makefile code for a standard library
@@ -172,13 +194,16 @@ function(private_add_standard_module library_type)
   add_version_info()
 
   private_add_project_headers()
-
+  
   # create library
   assert_library_type(${library_type})
   add_library(${PROJECT_NAME} ${library_type}
     ${${PROJECT_NAME}_srcs}
   )
 
+  # just forward dll dependencies
+  private_add_project_dlls(NO)
+  
   # add link libraries from unparsed arguments
   private_add_project_libraries(${PROJECT_NAME})
 
@@ -235,7 +260,7 @@ function(add_standard_executable)
   add_version_info()
 
   private_add_project_headers()
-
+  
   # The binary of the tool
   add_executable(${PROJECT_NAME} 
     ${${PROJECT_NAME}_srcs}
@@ -244,6 +269,9 @@ function(add_standard_executable)
   # add link libraries from unparsed arguments
   set(link_libraries "")
 
+  # add dll dependencies
+  private_add_project_dlls(YES)
+  
   # add link libraries from unparsed arguments
   private_add_project_libraries(${PROJECT_NAME})
 
@@ -262,7 +290,8 @@ function(add_standard_executable)
   # set build output properties (only for executables)
   set_target_properties( ${PROJECT_NAME}
     PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/output/bin"
+    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/output/bin"
+	RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/output/bin"
   )
 endfunction(add_standard_executable)
 
@@ -550,3 +579,38 @@ function(force_cxx_std standard_name)
   string(REGEX REPLACE "\\-std=[a-zA-Z0-9+:]+" "" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=${standard_name}" PARENT_SCOPE)
 endfunction(force_cxx_std)
+
+function(private_add_dll dllpath)
+  add_custom_command(
+    TARGET ${PROJECT_NAME}
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND}
+    ARGS -E copy "${dllpath}" ${CMAKE_BINARY_DIR}/output/bin
+  )
+endfunction(private_add_dll)
+
+function(add_include_dependency include_path)
+  log_debug("Adding header file dependency ${include_path} to ${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX}") 
+  list(APPEND ${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX} "${include_path}")
+  list(REMOVE_DUPLICATES ${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX})
+  set(${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX} "${${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX}}" "${include_path}" CACHE INTERNAL "${PROJECT_NAME} include dependencies" FORCE)
+endfunction(add_include_dependency)
+
+function(add_dll_dependency dll_path)
+  log_debug("Adding DLL dependency ${dll_path} to ${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX}") 
+  list(APPEND ${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX} "${dll_path}")
+  list(REMOVE_DUPLICATES ${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX})
+  set(${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX} "${${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX}}" "${dll_path}" CACHE INTERNAL "${PROJECT_NAME} DLL dependencies" FORCE)
+endfunction(add_dll_dependency)
+
+function(reset_project)
+  log_info("Resetting dependency cache vars of project ${PROJECT_NAME}")
+  get_cmake_property(_variableNames CACHE_VARIABLES)
+  foreach (_variableName ${_variableNames})
+    if("${_variableName}" STREQUAL "${PROJECT_NAME}${PROJECT_HEADER_DEPENDENCY_POSTFIX}")
+	  unset(${_variableName} CACHE)
+    elseif("${_variableName}" STREQUAL "${PROJECT_NAME}${PROJECT_DLL_DEPENDENCY_POSTFIX}")
+	  unset(${_variableName} CACHE)
+	endif()
+  endforeach()
+endfunction(reset_project)

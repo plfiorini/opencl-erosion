@@ -15,7 +15,8 @@ set(TRD_STAGE_DIR "${CMAKE_BINARY_DIR}/stage/third_party" CACHE INTERNAL "Stage 
 
 set(PROJECT_NAMESPACE   "mkay_"    CACHE INTERNAL  "Prefix for project artifacts")
 
-set(PROJECT_DEPENDENCY_POSTFIX "_dependant_headers" CACHE INTERNAL "Postfix for project header dependencies")
+set(PROJECT_HEADER_DEPENDENCY_POSTFIX "_dependant_headers" CACHE INTERNAL "Postfix for project header dependencies")
+set(PROJECT_DLL_DEPENDENCY_POSTFIX "_dependant_dlls" CACHE INTERNAL "Postfix for project dll dependencies")
 
 add_definitions(-DBOOST_ALL_NO_LIB)
 add_definitions(-DSDL_MAIN_HANDLED)
