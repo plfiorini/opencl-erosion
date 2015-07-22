@@ -23,11 +23,11 @@ namespace mkay
     : m_window_manager{}
     , m_event_manager{}
     , m_cl_manager{}
-    , m_camera()
-    , m_light()
-    , m_skybox()
-    , m_geo_object(100.0f)
-    , m_light_object(10.0f)
+		, m_camera{}
+		, m_light{}
+		, m_skybox{}
+		, m_geo_object{ 100.0f }
+    , m_light_object{ 10.0f }
   {
   }
   
@@ -70,7 +70,7 @@ namespace mkay
     
     // initialize own rendering stuff
     Colored_material_ptr red_material(
-      dynamic_cast<Colored_material *>(
+      static_cast<Colored_material *>(
         Material_factory::create(Material_type::Colored)
       )
     );
@@ -88,7 +88,7 @@ namespace mkay
     m_light.set_quadratic_attenuation(0.01f);
     
     Colored_material_ptr white_material(
-      dynamic_cast<Colored_material *>(
+			static_cast<Colored_material *>(
         Material_factory::create(Material_type::Colored)
       )
     );
@@ -121,10 +121,8 @@ namespace mkay
   {
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     
-    // draw skybox
     m_skybox.render(m_camera);
     
-    // draw own stuff    
     m_camera.setup_scene();
     
     glEnable(GL_DEPTH_TEST);
